@@ -1,0 +1,21 @@
+/**index.wxss**/
+.banner image {
+    width: 100%;
+    /* 图片宽度拉伸至容器宽度 */
+    height: 100%;
+    /* 图片高度拉伸至容器高度 */
+    object-fit: cover;
+    /* 图片将覆盖整个容器区域，可能被裁剪 */
+}
+
+.bottom {
+    display: flex;
+    justify-content: space-evenly;
+    margin-top: 20rpx;
+    flex-wrap: wrap;
+}
+
+.bottom>view>image {
+    width: 345rpx;
+    height: 200rpx;
+}

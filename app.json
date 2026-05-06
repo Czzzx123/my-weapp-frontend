@@ -1,0 +1,69 @@
+{
+    "pages": [
+        "pages/welcome/welcome",
+        "pages/index/index",
+        "pages/my/my",
+        "pages/activity/activity",
+        "pages/notice/notice",
+        "pages/collection/collection",
+        "pages/face/face",
+        "pages/voice/voice",
+        "pages/heart/heart",
+        "pages/goods/goods",
+        "pages/camera/camera",
+        "pages/form/form",
+        "pages/statistics/statistics"
+    ],
+    "window": {
+        "navigationBarTitleText": "智慧社区",
+        "navigationBarBackgroundColor": "#fff",
+        "enablePullDownRefresh": false,
+        "backgroundColor": "#00FFFF",
+        "navigationBarTextStyle": "black",
+        "backgroundTextStyle": "light"
+    },
+    "tabBar": {
+        "selectedColor": "#1c1c1b",
+        "position": "bottom",
+        "list": [{
+                "pagePath": "pages/index/index",
+                "text": "首页",
+                "iconPath": "images/icon/home.png",
+                "selectedIconPath": "images/icon/home-o.png"
+            },
+            {
+                "pagePath": "pages/activity/activity",
+                "text": "活动",
+                "iconPath": "images/icon/aid.png",
+                "selectedIconPath": "images/icon/aid-o.png"
+            },
+            {
+                "pagePath": "pages/notice/notice",
+                "text": "公告",
+                "iconPath": "images/icon/circle.png",
+                "selectedIconPath": "images/icon/circle-o.png"
+            },
+            {
+                "pagePath": "pages/my/my",
+                "text": "我的",
+                "iconPath": "images/icon/my.png",
+                "selectedIconPath": "images/icon/my-o.png"
+            }
+        ]
+    },
+
+    "usingComponents": {
+
+        "van-button": "@vant/weapp/button/index",
+        "van-cell-group": "@vant/weapp/cell-group/index",
+        "van-nav-bar": "@vant/weapp/nav-bar/index",
+        "van-grid": "@vant/weapp/grid/index",
+        "van-grid-item": "@vant/weapp/grid-item/index",
+        "van-cell": "@vant/weapp/cell/index",
+        "van-notice-bar": "@vant/weapp/notice-bar/index",
+        "van-image": "@vant/weapp/image/index",
+        "van-divider": "@vant/weapp/divider/index"
+    },
+
+    "sitemapLocation": "sitemap.json"
+}

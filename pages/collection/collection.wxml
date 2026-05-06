@@ -1,0 +1,50 @@
+<view class="container">
+  <view class="top">
+    <view class="tip">今日采集数量(人)</view>
+    <view class="count">{{dataDict.today_count}}</view>
+  </view>
+
+  <view class="function">
+
+    <view class="menu" style="border-right:1rpx solid #ddd;" bindtap="bindToForm"> 
+      <text class="fa fa-camera-retro"></text> 信息采集
+    </view>
+
+    <view class="menu" bindtap="bindToStatistics">  
+      <text class="fa fa-pie-chart" ></text> 数据统计
+    </view>
+
+  </view>
+  
+  <view class="table">
+    <view class="item">
+      <view class="title">社区信息列表（{{dataDict.today_count}}人）</view>
+    </view>
+
+    <view class="item" wx:for="{{dataDict.result}}" wx:for-item="row" wx:key="index">
+      <view class="record">
+        <view class="avatar">
+          <image src="{{row.avatar}}"></image>
+        </view>
+
+        <view class="desc">
+          <view class="username">{{row.name}}</view>
+          
+          <view>
+            <view class="txt-group">
+              <label class="zh">网格区域</label>
+              <label class="en"> | {{row.area.desc}}</label>
+            </view>
+            <view class="area"> 
+              <label class="fa fa-map-marker"></label> {{row.area.name}} 
+            </view>
+          </view>
+        </view>
+        <view class="delete" bindtap="doDeleteRow" data-nid="{{row.id}}" data-index="{{index}}" >
+          <label class="iconfont icon-shanchu"></label>
+        </view>
+      </view>
+    </view>
+
+  </view>
+</view>

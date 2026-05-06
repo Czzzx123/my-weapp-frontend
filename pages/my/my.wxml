@@ -1,0 +1,47 @@
+
+<block wx:if="{{userInfo==null}}">
+  <navigator class="login-area" url="/pages/login/login">
+    <view class="btn">一键登录</view>
+  </navigator>
+</block>
+<block wx:else>
+  <view class="container">
+    <view class="top-view">
+      <view class="user">
+        <view class="row">
+          <image class="avatar" src="{{userInfo.avatar}}"></image>
+          <view class="name">
+            <view bindtap="logout">{{userInfo.name}}</view>
+          </view>
+        </view>
+
+      </view>
+      <view class="numbers">
+        <view class="row">
+          <text>{{userInfo.score}}</text>
+          <text>积分</text>
+        </view>
+        <view class="row">
+          <text>55</text>
+          <text>其他</text>
+        </view>
+        <view class="row">
+          <text>77</text>
+          <text>其他</text>
+        </view>
+        <view class="row">
+          <text>56</text>
+          <text>其他</text>
+        </view>
+      </view>
+    </view>
+    <van-list>
+      <van-cell title="积分兑换记录" is-link />
+      <van-cell title="我参加的活动" is-link />
+      <van-cell title="分享应用" is-link />
+      <van-cell title="联系客服" is-link  />
+    </van-list>
+  </view>
+
+
+</block>
