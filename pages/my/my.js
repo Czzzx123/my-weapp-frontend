@@ -1,9 +1,16 @@
 Page({
     data: {
-      userInfo:{
-        avatar:'/images/img/b.jpg',
-        name:'justin',
-        score:100
-      },
+        userInfo: {
+            name: '吴彦祖',
+            score: 100
+        },
     },
-  })
+    getPhoneNumber() {
+
+    },
+    handleOtherLogin() {
+        wx.navigateTo({
+            url: '/pages/login/login'
+        })
+    }
+})

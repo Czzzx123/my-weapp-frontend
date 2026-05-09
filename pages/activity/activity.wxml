@@ -1,2 +1,15 @@
-<!--pages/activity/activity.wxml-->
-<text>pages/activity/activity.wxml</text>
+<view class="container">
+    <!-- 使用wx:for循环遍历活动报名列表 -->
+    <view wx:for="{{activityList}}" wx:key="index" class="activity-item">
+        <!-- 活动内容 -->
+        <view class="activity-content">
+            <view class="activity-title">{{item.title}}</view>
+            <view class="activity-enrollment">报名人数：{{item.count}} | 总人数：{{item.total_count}}</view>
+            <view class="activity-time">获得积分：{{item.score}}</view>
+            <view class="activity-time">{{item.date}}</view>
+            <view class="activity-description">{{item.text}}</view>
+        </view>
+        <!-- 报名按钮 -->
+        <button class="signup-btn" bindtap="handleSignup" mark:id="{{item.id}}">报名</button>
+    </view>
+</view>

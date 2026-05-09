@@ -1,47 +1,71 @@
-
 <block wx:if="{{userInfo==null}}">
-  <navigator class="login-area" url="/pages/login/login">
-    <view class="btn">一键登录</view>
-  </navigator>
+    <!-- 显示手机号快捷登录和其他手机号登录 -->
+    <view class="container1">
+        <view class="main">
+            <view class="icon-view">
+                <!-- 应用图标 -->
+                <image src="/images/icon/icon.png" class='app-icon' mode="" />
+                <text class="title">智慧社区</text>
+            </view>
+        </view>
+
+        <van-cell-group>
+            <van-cell>
+                <button type="warn" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber">手机号快捷登录</button>
+            </van-cell>
+        </van-cell-group>
+        <van-cell-group>
+            <van-cell>
+                <button type="primary" plain bind:tap="handleOtherLogin">其他手机号登录</button>
+            </van-cell>
+        </van-cell-group>
+
+        <view class="agreement-container">
+            <checkbox class="checkbox" value="{{agreed}}" bindchange='handleAgreeChange' />
+            <text class="agreement-text">我已阅读并同意</text>
+            <navigator url="" class="agreement-link">《用户协议》</navigator>
+        </view>
+    </view>
+
 </block>
 <block wx:else>
-  <view class="container">
-    <view class="top-view">
-      <view class="user">
-        <view class="row">
-          <image class="avatar" src="{{userInfo.avatar}}"></image>
-          <view class="name">
-            <view bindtap="logout">{{userInfo.name}}</view>
-          </view>
-        </view>
+    <view class="container">
+        <view class="top-view">
+            <view class="user">
+                <view class="row">
+                    <image class="avatar" src="{{userInfo.avatar}}"></image>
+                    <view class="name">
+                        <view bindtap="logout">{{userInfo.name}}</view>
+                    </view>
+                </view>
 
-      </view>
-      <view class="numbers">
-        <view class="row">
-          <text>{{userInfo.score}}</text>
-          <text>积分</text>
+            </view>
+            <view class="numbers">
+                <view class="row">
+                    <text>{{userInfo.score}}</text>
+                    <text>积分</text>
+                </view>
+                <view class="row">
+                    <text>55</text>
+                    <text>其他</text>
+                </view>
+                <view class="row">
+                    <text>77</text>
+                    <text>其他</text>
+                </view>
+                <view class="row">
+                    <text>56</text>
+                    <text>其他</text>
+                </view>
+            </view>
         </view>
-        <view class="row">
-          <text>55</text>
-          <text>其他</text>
-        </view>
-        <view class="row">
-          <text>77</text>
-          <text>其他</text>
-        </view>
-        <view class="row">
-          <text>56</text>
-          <text>其他</text>
-        </view>
-      </view>
+        <van-list>
+            <van-cell title="积分兑换记录" is-link />
+            <van-cell title="我参加的活动" is-link />
+            <van-cell title="分享应用" is-link />
+            <van-cell title="联系客服" is-link />
+        </van-list>
     </view>
-    <van-list>
-      <van-cell title="积分兑换记录" is-link />
-      <van-cell title="我参加的活动" is-link />
-      <van-cell title="分享应用" is-link />
-      <van-cell title="联系客服" is-link  />
-    </van-list>
-  </view>
 
 
 </block>

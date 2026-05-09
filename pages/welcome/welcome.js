@@ -4,7 +4,7 @@ Page({
 
     data: {
         second: 3,
-        img: '/images/bg/splash.png'
+        img: ''
     },
     doJump() {
         //点击跳转到首页

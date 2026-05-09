@@ -12,7 +12,8 @@
         "pages/goods/goods",
         "pages/camera/camera",
         "pages/form/form",
-        "pages/statistics/statistics"
+        "pages/statistics/statistics",
+        "pages/login/login"
     ],
     "window": {
         "navigationBarTitleText": "智慧社区",
@@ -62,7 +63,8 @@
         "van-cell": "@vant/weapp/cell/index",
         "van-notice-bar": "@vant/weapp/notice-bar/index",
         "van-image": "@vant/weapp/image/index",
-        "van-divider": "@vant/weapp/divider/index"
+        "van-divider": "@vant/weapp/divider/index",
+        "van-field": "@vant/weapp/field/index"
     },
 
     "sitemapLocation": "sitemap.json"

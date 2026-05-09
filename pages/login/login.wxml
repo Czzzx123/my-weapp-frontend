@@ -1,0 +1,24 @@
+<view class="container">
+  <view class="main">
+    <view class="icon-view">
+      <!-- 应用图标 -->
+      <image src="/images/icon/icon.png" class="app-icon"></image>
+      <text class="title">智慧社区</text>
+    </view>
+  </view>
+
+
+  <van-field value="{{ phone }}" bind:input="onPhoneInput" label="手机号" type="tel" placeholder="请输入手机号" clearable="{{ true }}" />
+
+
+  <van-field value="{{code}}" bind:input="onCodeInput" center clearable label="验证码" placeholder="请输入验证码" use-button-slot>
+    <van-button slot="button" size="small" type="primary" bind:tap="sendCode" disabled='{{sendCodeDisabled}}'>
+      {{buttonText}}
+    </van-button>
+  </van-field>
+
+
+
+
+  <van-button type="info" block="{{ true }}" bind:tap="login">登录</van-button>
+</view>

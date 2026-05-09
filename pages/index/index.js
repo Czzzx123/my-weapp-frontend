@@ -3,7 +3,7 @@ import api from "../../config/settings"
 Page({
     data: {
         banner_list: [{
-            img: '/images/banner/banner1.png'
+            img: ''
         }],
         notice: '社区最佳的交友平台上线啦，欢迎大家点击参与，有任何问题可以后台联系管理员'
     },

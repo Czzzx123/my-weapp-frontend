@@ -1,0 +1,25 @@
+.container {
+    padding: 20rpx;
+  
+  }
+  .main{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .icon-view{
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 50rpx;
+  }
+  .title {
+    font-size: 28rpx;
+    font-weight: bold;
+    color: #333333;
+  }
+  .app-icon {
+    width: 100rpx;
+    height: 100rpx;
+    margin: 40rpx auto 20rpx; /* 上边距为40rpx，下边距为20rpx，左右居中 */
+  }
+  
