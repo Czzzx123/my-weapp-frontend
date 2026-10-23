@@ -1,24 +1,39 @@
 <view class="container">
-  <view class="main">
-    <view class="icon-view">
-      <!-- 应用图标 -->
-      <image src="/images/icon/icon.png" class="app-icon"></image>
-      <text class="title">智慧社区</text>
+    <view class="main">
+        <view class="icon-view">
+            <image src="/images/icon/icon.png" class="app-icon"></image>
+            <text class="title">未蓝科技</text>
+        </view>
     </view>
-  </view>
 
+    <view class="form-area">
+        <t-input
+            value="{{phone}}"
+            bind:change="onPhoneInput"
+            label="手机号"
+            type="tel"
+            placeholder="请输入手机号"
+            clearable="{{true}}"
+        />
 
-  <van-field value="{{ phone }}" bind:input="onPhoneInput" label="手机号" type="tel" placeholder="请输入手机号" clearable="{{ true }}" />
+        <view class="code-row">
+            <t-input
+                value="{{code}}"
+                bind:change="onCodeInput"
+                label="验证码"
+                placeholder="请输入验证码"
+                clearable="{{true}}"
+                class="code-input"
+            />
+            <t-button
+                theme="primary"
+                size="small"
+                disabled="{{sendCodeDisabled}}"
+                bind:tap="sendCode"
+                class="code-btn"
+            >{{buttonText}}</t-button>
+        </view>
 
-
-  <van-field value="{{code}}" bind:input="onCodeInput" center clearable label="验证码" placeholder="请输入验证码" use-button-slot>
-    <van-button slot="button" size="small" type="primary" bind:tap="sendCode" disabled='{{sendCodeDisabled}}'>
-      {{buttonText}}
-    </van-button>
-  </van-field>
-
-
-
-
-  <van-button type="info" block="{{ true }}" bind:tap="login">登录</van-button>
+        <t-button theme="primary" block="{{true}}" bind:tap="login" class="login-btn">登录</t-button>
+    </view>
 </view>

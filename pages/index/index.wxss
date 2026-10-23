@@ -1,11 +1,20 @@
-/**index.wxss**/
+page {
+    background-color: #f5f5f5;
+}
+
+.container {
+    padding-bottom: 20rpx;
+}
+
+.banner {
+    width: 100%;
+    overflow: hidden;
+}
+
 .banner image {
     width: 100%;
-    /* 图片宽度拉伸至容器宽度 */
     height: 100%;
-    /* 图片高度拉伸至容器高度 */
     object-fit: cover;
-    /* 图片将覆盖整个容器区域，可能被裁剪 */
 }
 
 .bottom {
@@ -13,9 +22,85 @@
     justify-content: space-evenly;
     margin-top: 20rpx;
     flex-wrap: wrap;
+    padding: 0 16rpx;
 }
 
-.bottom>view>image {
+.bottom > view > image {
     width: 345rpx;
     height: 200rpx;
+    border-radius: 16rpx;
+}
+
+/* ============ 上课日常 ============ */
+.daily-section {
+    margin-top: 20rpx;
+    padding: 0 20rpx;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20rpx;
+}
+
+.section-title {
+    font-size: 34rpx;
+    font-weight: 600;
+    color: #333;
+    margin-left: 12rpx;
+}
+
+.daily-card {
+    background-color: #ffffff;
+    border-radius: 24rpx;
+    overflow: hidden;
+    margin-bottom: 24rpx;
+    box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.card-date {
+    display: inline-flex;
+    align-items: center;
+    margin: 24rpx;
+    padding: 8rpx 24rpx;
+    background-color: #1890ff;
+    border-radius: 999rpx;
+    color: #ffffff;
+    font-size: 24rpx;
+}
+
+.card-date text {
+    margin-left: 8rpx;
+}
+
+.card-img {
+    width: 100%;
+    height: 340rpx;
+    display: block;
+}
+
+.card-content {
+    padding: 24rpx;
+    font-size: 28rpx;
+    color: #333;
+    line-height: 1.7;
+}
+
+.card-footer {
+    display: flex;
+    border-top: 1rpx solid #f0f0f0;
+}
+
+.action {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20rpx 0;
+}
+
+.action text {
+    font-size: 26rpx;
+    color: #666;
+    margin-left: 8rpx;
 }

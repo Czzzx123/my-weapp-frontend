@@ -1,8 +1,0 @@
-<view class="container">
-    <view class='menu' wx:for="{{dataList}}" wx:key="index">
-        <view><label class='iconfont icon-SCHEDULE'></label>
-            {{item.date}}
-        </view>
-        <label>{{item.count}}个</label>
-    </view>
-</view>

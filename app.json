@@ -4,31 +4,23 @@
         "pages/index/index",
         "pages/my/my",
         "pages/activity/activity",
-        "pages/notice/notice",
-        "pages/collection/collection",
-        "pages/face/face",
-        "pages/voice/voice",
-        "pages/heart/heart",
-        "pages/goods/goods",
-        "pages/camera/camera",
-        "pages/form/form",
-        "pages/statistics/statistics",
         "pages/login/login"
     ],
     "window": {
-        "navigationBarTitleText": "智慧社区",
+        "navigationBarTitleText": "未蓝科技",
         "navigationBarBackgroundColor": "#fff",
         "enablePullDownRefresh": false,
-        "backgroundColor": "#00FFFF",
+        "backgroundColor": "#f5f5f5",
         "navigationBarTextStyle": "black",
-        "backgroundTextStyle": "light"
+        "backgroundTextStyle": "dark"
     },
     "tabBar": {
-        "selectedColor": "#1c1c1b",
+        "selectedColor": "#1890ff",
+        "color": "#999999",
         "position": "bottom",
         "list": [{
                 "pagePath": "pages/index/index",
-                "text": "首页",
+                "text": "成长",
                 "iconPath": "images/icon/home.png",
                 "selectedIconPath": "images/icon/home-o.png"
             },
@@ -39,12 +31,6 @@
                 "selectedIconPath": "images/icon/aid-o.png"
             },
             {
-                "pagePath": "pages/notice/notice",
-                "text": "公告",
-                "iconPath": "images/icon/circle.png",
-                "selectedIconPath": "images/icon/circle-o.png"
-            },
-            {
                 "pagePath": "pages/my/my",
                 "text": "我的",
                 "iconPath": "images/icon/my.png",
@@ -52,20 +38,17 @@
             }
         ]
     },
-
     "usingComponents": {
-
-        "van-button": "@vant/weapp/button/index",
-        "van-cell-group": "@vant/weapp/cell-group/index",
-        "van-nav-bar": "@vant/weapp/nav-bar/index",
-        "van-grid": "@vant/weapp/grid/index",
-        "van-grid-item": "@vant/weapp/grid-item/index",
-        "van-cell": "@vant/weapp/cell/index",
-        "van-notice-bar": "@vant/weapp/notice-bar/index",
-        "van-image": "@vant/weapp/image/index",
-        "van-divider": "@vant/weapp/divider/index",
-        "van-field": "@vant/weapp/field/index"
+        "t-button": "tdesign-miniprogram/button/button",
+        "t-cell": "tdesign-miniprogram/cell/cell",
+        "t-cell-group": "tdesign-miniprogram/cell-group/cell-group",
+        "t-grid": "tdesign-miniprogram/grid/grid",
+        "t-grid-item": "tdesign-miniprogram/grid-item/grid-item",
+        "t-icon": "tdesign-miniprogram/icon/icon",
+        "t-image": "tdesign-miniprogram/image/image",
+        "t-notice-bar": "tdesign-miniprogram/notice-bar/notice-bar",
+        "t-input": "tdesign-miniprogram/input/input",
+        "t-divider": "tdesign-miniprogram/divider/divider"
     },
-
     "sitemapLocation": "sitemap.json"
 }

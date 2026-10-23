@@ -18,15 +18,27 @@
             "outputPath": ""
         },
         "useCompilerPlugins": false,
-        "minifyWXML": true
-
+        "minifyWXML": true,
+        "compileWorklet": false,
+        "uploadWithSourceMap": true,
+        "minifyWXSS": true,
+        "localPlugins": false,
+        "disableUseStrict": false,
+        "condition": false,
+        "swc": false,
+        "disableSWC": true
     },
     "compileType": "miniprogram",
+    "miniprogramRoot": "./",
     "simulatorPluginLibVersion": {},
     "packOptions": {
-        "ignore": [],
+        "ignore": [
+            { "type": "folder", "value": ".trunk" },
+            { "type": "folder", "value": "node_modules" }
+        ],
         "include": []
     },
     "appid": "wx878ab2baaa9c34be",
-    "editorSetting": {}
+    "editorSetting": {},
+    "libVersion": "3.15.0"
 }

@@ -1,2 +1,24 @@
 /**app.wxss**/
-@import "/static/css/iconfont.wxss"
+@import "/static/css/iconfont.wxss";
+
+/* TDesign 全局 CSS 变量 */
+page {
+  --td-brand-color: #1890ff;
+  --td-warning-color: #ff976a;
+  --td-error-color: #ff4d4f;
+  --td-success-color: #07c160;
+  --td-brand-color-light: #e8f4ff;
+  --td-bg-color: #f5f5f5;
+  --td-text-color-primary: #333333;
+  --td-text-color-secondary: #666666;
+  --td-text-color-placeholder: #999999;
+  --td-border-color: #f5f5f5;
+  --td-radius-default: 12rpx;
+  --td-radius-large: 24rpx;
+  --td-font-size-base: 28rpx;
+  --td-font-size-s: 24rpx;
+  --td-font-size-l: 32rpx;
+
+  background-color: #f5f5f5;
+  font-family: -apple-system, PingFang SC, "Helvetica Neue", "Microsoft YaHei", sans-serif;
+}

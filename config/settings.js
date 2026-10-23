@@ -1,4 +1,4 @@
-const rootUrl = 'http://10.1.86.219:8000/smart'
+const rootUrl = 'http://127.0.0.1:8000/smart'
 
 
 //表示到处--》在任意JS中可以导入 这个是所有发生网络请求，获取后端数据的路由

@@ -3,6 +3,33 @@ var app = getApp()
 Page({
     data: {
         activityList: [
+          {
+            "id": 1,
+            "title": "秋季运动会",
+            "text": "秋季运动会",
+            "date": "2026-05-09",
+            "count": 0,
+            "score": 100,
+            "total_count": 20
+        },
+        {
+            "id": 3,
+            "title": "读书分享会",
+            "text": "读书分享，希望大家可以分享分享自己最近读的一些书籍",
+            "date": "2026-05-11",
+            "count": 0,
+            "score": 500,
+            "total_count": 10
+        },
+        {
+            "id": 2,
+            "title": "游泳马拉松",
+            "text": "游泳马拉松",
+            "date": "2026-05-13",
+            "count": 0,
+            "score": 10000,
+            "total_count": 30
+        }
 
         ]
     },

@@ -1,37 +1,42 @@
+<!--首页-->
 <view class="container">
     <view class="banner">
-        <swiper autoplay indicator-dots circular indicator-color="#FFFFF" interval="3000">
+        <swiper autoplay circular indicator-color="#ddd" interval="3000" style="height: 360rpx;">
             <swiper-item wx:for="{{banner_list}}" wx:key="*this">
-                <image src="{{item.img}}" mode="widthFix" />
+                <image src="{{item.img}}" mode="aspectFill" style="width: 100%; height: 100%;" />
             </swiper-item>
         </swiper>
     </view>
 
     <!--通知-->
-    <van-notice-bar left-icon="volume-o" text="{{notice}}" />
+    <t-notice-bar content="{{notice}}" prefixIcon="sound" theme="info"  visible="{{visible}}"  marquee="{{marquee1}}">
 
-    <van-grid column-num="3">
-        <van-grid-item icon="/images/menu/ht.png" text="信息采集" bind:click='gotoCollection' />
-        <van-grid-item icon="/images/menu/sqhd.png" text="社区活动" bind:click='gotoActivity' />
-        <van-grid-item icon="/images/menu/rljc.png" text="人脸检测" bind:click='gotoFace' />
-        <van-grid-item icon="/images/menu/yysb.png" text="语音识别" bind:click='gotoVoice' />
-        <van-grid-item icon="/images/menu/xljc.png" text="心率检测" bind:click='gotoHeart' />
-        <van-grid-item icon="/images/menu/jfsc.png" text="积分商城" bind:click='gotoGoods' />
-    </van-grid>
+    </t-notice-bar>
 
+    <!--上课日常-->
+    <view class="daily-section">
+        <view class="section-header">
+            <t-icon name="time" size="40rpx" color="#1890ff" />
+            <text class="section-title">上课日常</text>
+        </view>
 
-    <view class='bottom'>
-        <view>
-            <image src="/images/home/cute_1.jpg" mode="scaleToFill" />
-        </view>
-        <view>
-            <image src="/images/home/cute_2.jpg" mode="scaleToFill" />
-        </view>
-        <view>
-            <image src="/images/home/cute_3.jpg" mode="scaleToFill" />
-        </view>
-        <view>
-            <image src="/images/home/cute_4.jpg" mode="scaleToFill" />
+        <view class="daily-card" wx:for="{{daily_list}}" wx:key="id">
+            <view class="card-date">
+                <t-icon name="calendar" size="28rpx" color="#ffffff" />
+                <text>{{item.date}}</text>
+            </view>
+            <image class="card-img" src="{{item.img}}" mode="aspectFill" />
+            <view class="card-content">{{item.content}}</view>
+            <view class="card-footer">
+                <view class="action" bindtap="onCollect">
+                    <t-icon name="heart" size="36rpx" color="#999" />
+                    <text>收藏</text>
+                </view>
+                <view class="action" bindtap="onShare">
+                    <t-icon name="share" size="36rpx" color="#999" />
+                    <text>分享</text>
+                </view>
+            </view>
         </view>
     </view>
 

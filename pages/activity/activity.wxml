@@ -1,15 +1,25 @@
 <view class="container">
-    <!-- 使用wx:for循环遍历活动报名列表 -->
-    <view wx:for="{{activityList}}" wx:key="index" class="activity-item">
-        <!-- 活动内容 -->
+    <view wx:for="{{activityList}}" wx:key="index" class="activity-card">
         <view class="activity-content">
             <view class="activity-title">{{item.title}}</view>
-            <view class="activity-enrollment">报名人数：{{item.count}} | 总人数：{{item.total_count}}</view>
-            <view class="activity-time">获得积分：{{item.score}}</view>
-            <view class="activity-time">{{item.date}}</view>
+            <view class="activity-info">
+                <t-icon name="user" size="28rpx" color="#999" />
+                <text>报名人数：{{item.count}} | 总人数：{{item.total_count}}</text>
+            </view>
+            <view class="activity-info">
+                <t-icon name="star" size="28rpx" color="#999" />
+                <text>获得积分：{{item.score}}</text>
+            </view>
+            <view class="activity-info">
+                <t-icon name="calendar" size="28rpx" color="#999" />
+                <text>{{item.date}}</text>
+            </view>
             <view class="activity-description">{{item.text}}</view>
         </view>
-        <!-- 报名按钮 -->
-        <button class="signup-btn" bindtap="handleSignup" mark:id="{{item.id}}">报名</button>
+        <t-button theme="primary" size="small" bind:tap="handleSignup" mark:id="{{item.id}}" class="signup-btn">报名</t-button>
+    </view>
+    <view wx:if="{{activityList.length === 0}}" class="empty">
+        <t-icon name="info-circle" size="80rpx" color="#ccc" />
+        <text class="empty-text">暂无活动</text>
     </view>
 </view>
