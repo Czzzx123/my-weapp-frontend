@@ -35,10 +35,6 @@
   "packOptions": {
     "ignore": [
       {
-        "value": ".trunk",
-        "type": "folder"
-      },
-      {
         "value": "node_modules",
         "type": "folder"
       }

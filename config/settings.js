@@ -19,7 +19,6 @@ module.exports = {
     base: rootUrl,
 
     // 基础内容
-    welcome: rootUrl + '/welcome/',
     banner: rootUrl + '/banner/',
     notice: rootUrl + '/notice/',
 

@@ -13,6 +13,8 @@ dist/
 *.log
 .DS_Store
 Thumbs.db
+# Trunk 代码检查工具的缓存目录，内含完整源码快照（曾达 51MB），随本机生成不入库
+.trunk/
 
 # ---------- 编辑器 ----------
 .idea/
