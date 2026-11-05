@@ -110,18 +110,18 @@ Page({
           // ① 真实成功：60s
           wx.showToast({ title: '验证码已发送', icon: 'none' })
           that.startCountdown(60)
-        } else if (data) {
+        } else {
           // ③ 真实业务失败：不启动倒计时，不罚等，按钮回可发送态
           // 注意：此处禁止提示「当前展示离线数据」，否则用户会误以为拿到了可用验证码
           wx.showToast({ title: (data && data.msg) || '发送失败，请重试', icon: 'none' })
-        } else {
-          // 无返回体：视为降级演示态
-          wx.showToast({ title: '演示模式：验证码 8888', icon: 'none', duration: 2000 })
-          that.setData({ demoMode: true })
-          that.startCountdown(30)
         }
       })
-      .catch(function () {
+      .catch(function (err) {
+        // 区分业务失败与网络失败：业务失败绝不进入演示模式
+        if (err && err.type === 'business') {
+          wx.showToast({ title: err.msg || '发送失败，请重试', icon: 'none' })
+          return
+        }
         // ② 降级演示态（网络失败/超时/后端未就绪）：30s + 演示标记
         wx.showToast({ title: '演示模式：验证码 8888', icon: 'none', duration: 2000 })
         that.setData({ demoMode: true })
@@ -209,8 +209,23 @@ Page({
           that.tryMockLogin(phone, code, 'business_error')
         }
       })
-      .catch(() => {
-        // 网络错误，降级到 mock 登录
+      .catch((err) => {
+        // 后端已明确拒绝（验证码错误、账号不存在等）：必须如实报错，
+        // 不能降级成演示登录，否则"验证码错误"会变成"登录成功"
+        if (err && err.type === 'business') {
+          track('login_submit', {
+            agreed: true,
+            phone_valid: true,
+            result: 'failed',
+            reason: 'business_error',
+            demo_mode: false
+          })
+          wx.showToast({ title: err.msg || '登录失败，请重试', icon: 'none' })
+          that.setData({ loading: false })
+          that.refreshCanSubmit()
+          return
+        }
+        // 网络错误/后端未就绪，降级到 mock 登录
         that.tryMockLogin(phone, code, 'network_error')
       })
   },

@@ -103,7 +103,11 @@ Page({
                     that.setData(patch)
                 }
             })
-            .catch(() => {
+            .catch((err) => {
+                // 业务失败需可观测，不能静默；网络失败则保持 mock 数据（离线降级）
+                if (err && err.type === 'business') {
+                    console.log('[首页] Banner 接口业务失败:', err.code, err.msg)
+                }
                 // 后端未就绪，保持 mock 数据
             })
     },

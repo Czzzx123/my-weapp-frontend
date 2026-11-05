@@ -47,7 +47,13 @@ Page({
                     that.setData({ menu_list: list.slice(0, 8) })
                 }
             })
-            .catch(() => {
+            .catch((err) => {
+                // 后端明确返回业务失败：如实提示，不伪装成离线降级
+                if (err && err.type === 'business') {
+                    console.log('[菜单] 后端返回业务错误:', err.code, err.msg)
+                    wx.showToast({ title: err.msg || '菜单加载失败', icon: 'none' })
+                    return
+                }
                 // 接口不可用，降级本地 mock 数据：必须让用户知道当前是离线数据（CR-E02）
                 console.log('[菜单] 后端接口未就绪，使用本地 mock 数据')
                 wx.showToast({ title: '当前展示离线数据', icon: 'none' })
