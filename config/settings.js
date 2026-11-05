@@ -18,19 +18,16 @@ module.exports = {
     // 基础地址（给 request 工具用）
     base: rootUrl,
 
+    // 基础内容
     welcome: rootUrl + '/welcome/',
     banner: rootUrl + '/banner/',
-    collection: rootUrl + '/collection/',
-    area: rootUrl + '/area/',
-    statistics: rootUrl + '/statistics/',
-    face: rootUrl + '/face/',
-    voice: rootUrl + '/voice/',
     notice: rootUrl + '/notice/',
-    activity: rootUrl + '/activity/',
+
+    // 登录（阶段 1 后端就绪后接入）
     send_sms: rootUrl + '/user/send_sms/',
     login: rootUrl + '/user/login/',
-    quick_login: rootUrl + '/user/quick_login',
-    join: rootUrl + '/join/join/',
-    // 服务菜单
+    quick_login: rootUrl + '/user/quick_login/',
+
+    // 服务菜单（后端未就绪，前端降级 mock）
     menu: rootUrl + '/menu/'
 }
