@@ -1,94 +1,209 @@
 page {
-    background-color: #f5f5f5;
+    background-color: var(--wl-bg);
 }
 
-.container {
-    padding-bottom: 20rpx;
+/* 复用 app.wxss：.card / .section-header / .section-bar / .section-title / .section-more / .tapable / .safe-bottom */
+
+.page {
+    padding: var(--wl-sp-3);
+    padding-bottom: calc(var(--wl-sp-4) + env(safe-area-inset-bottom));
+    box-sizing: border-box;
 }
 
-.banner {
-    width: 100%;
+/* ============ Banner ============ */
+.banner-swiper {
+    height: 320rpx;
+    border-radius: var(--wl-r-m);
     overflow: hidden;
+    box-shadow: var(--wl-shadow-card);
 }
 
-.banner image {
+.banner-img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
 }
 
-.bottom {
+/* 渐变文案 Banner */
+.banner-card {
+    position: relative;
     display: flex;
-    justify-content: space-evenly;
-    margin-top: 20rpx;
-    flex-wrap: wrap;
-    padding: 0 16rpx;
+    align-items: center;
+    height: 100%;
+    padding: 0 var(--wl-sp-4);
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
-.bottom > view > image {
-    width: 345rpx;
-    height: 200rpx;
-    border-radius: 16rpx;
+.banner-blue {
+    background: linear-gradient(135deg, #6BA1FF 0%, #2F6BED 100%);
+}
+
+.banner-mint {
+    background: linear-gradient(135deg, #4ED3A0 0%, #2BB673 100%);
+}
+
+.banner-purple {
+    background: linear-gradient(135deg, #9A8CFF 0%, #7B61FF 100%);
+}
+
+.banner-text {
+    display: flex;
+    flex-direction: column;
+    z-index: 2;
+}
+
+.banner-tag {
+    align-self: flex-start;
+    padding: 4rpx 18rpx;
+    border-radius: var(--wl-r-s);
+    background-color: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+    font-size: var(--wl-fs-mini);
+}
+
+.banner-title {
+    margin-top: var(--wl-sp-2);
+    font-size: 40rpx;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 1rpx;
+}
+
+.banner-sub {
+    margin-top: var(--wl-sp-1);
+    font-size: var(--wl-fs-sub);
+    color: rgba(255, 255, 255, 0.88);
+}
+
+/* 装饰圆 */
+.deco-circle {
+    position: absolute;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.14);
+}
+
+.deco-circle-1 {
+    width: 220rpx;
+    height: 220rpx;
+    right: -60rpx;
+    top: -70rpx;
+}
+
+.deco-circle-2 {
+    width: 140rpx;
+    height: 140rpx;
+    right: 90rpx;
+    bottom: -50rpx;
+}
+
+/* ============ 公告通知卡 ============ */
+.notice-card {
+    display: flex;
+    align-items: center;
+    margin-top: var(--wl-sp-3);
+    padding: var(--wl-sp-2) var(--wl-sp-3);
+    background: linear-gradient(135deg, #EAF1FF 0%, #F5F8FF 100%);
+}
+
+.notice-text {
+    flex: 1;
+    margin: 0 var(--wl-sp-2);
+    font-size: var(--wl-fs-sub);
+    color: var(--wl-text-1);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.notice-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44rpx;
+    height: 44rpx;
+    flex-shrink: 0;
 }
 
 /* ============ 上课日常 ============ */
-.daily-section {
-    margin-top: 20rpx;
-    padding: 0 20rpx;
-}
-
-.section-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20rpx;
-}
-
-.section-title {
-    font-size: 34rpx;
-    font-weight: 600;
-    color: #333;
-    margin-left: 12rpx;
-}
-
 .daily-card {
-    background-color: #ffffff;
-    border-radius: 24rpx;
-    overflow: hidden;
-    margin-bottom: 24rpx;
-    box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+    padding: var(--wl-sp-3) var(--wl-sp-3) 0;
+}
+
+/* 卡片头：标题 + 日期 */
+.card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title {
+    font-size: 30rpx;
+    font-weight: 600;
+    color: var(--wl-text-1);
+}
+
+.course-tag {
+    display: inline-flex;
+    padding: 4rpx 16rpx;
+    border-radius: var(--wl-r-s);
+    font-size: var(--wl-fs-cap);
+    font-weight: 500;
+}
+
+.course-blue {
+    background-color: var(--wl-brand-bg);
+    color: var(--wl-brand);
+}
+
+.course-mint {
+    background-color: #E8F8F1;
+    color: var(--wl-success);
+}
+
+.course-purple {
+    background-color: #F1EDFF;
+    color: #7B61FF;
 }
 
 .card-date {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    margin: 24rpx;
-    padding: 8rpx 24rpx;
-    background-color: #1890ff;
-    border-radius: 999rpx;
-    color: #ffffff;
-    font-size: 24rpx;
+    flex-shrink: 0;
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-3);
 }
 
 .card-date text {
-    margin-left: 8rpx;
+    margin-left: 6rpx;
 }
 
-.card-img {
-    width: 100%;
-    height: 340rpx;
-    display: block;
+/* 正文（2 行截断，保证扫读节奏） */
+.card-body {
+    padding-top: var(--wl-sp-2);
 }
 
 .card-content {
-    padding: 24rpx;
-    font-size: 28rpx;
-    color: #333;
-    line-height: 1.7;
+    padding: var(--wl-sp-2) 0 var(--wl-sp-3);
+    font-size: var(--wl-fs-body);
+    color: var(--wl-text-2);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
+/* 操作区 */
 .card-footer {
     display: flex;
-    border-top: 1rpx solid #f0f0f0;
+    align-items: center;
+    border-top: 1rpx solid var(--wl-divider);
+}
+
+.footer-divider {
+    width: 1rpx;
+    height: 32rpx;
+    background-color: var(--wl-divider);
 }
 
 .action {
@@ -96,11 +211,30 @@ page {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20rpx 0;
+    padding: var(--wl-sp-3) 0;
 }
 
 .action text {
-    font-size: 26rpx;
-    color: #666;
-    margin-left: 8rpx;
+    font-size: var(--wl-fs-sub);
+    color: var(--wl-text-2);
+    margin-left: var(--wl-sp-1);
+}
+
+.action-active text {
+    color: var(--wl-like);
+}
+
+/* 分享按钮伪装成普通 action（去除 button 默认样式） */
+.share-btn {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.share-btn::after {
+    border: none;
 }

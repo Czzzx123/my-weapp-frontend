@@ -1,39 +1,72 @@
-<view class="container">
-    <view class="main">
-        <view class="icon-view">
-            <image src="/images/icon/icon.png" class="app-icon"></image>
-            <text class="title">未蓝科技</text>
-        </view>
+<view class="page">
+    <!-- 品牌区 -->
+    <view class="brand">
+        <image src="/images/icon/icon.png" class="app-icon"></image>
+        <text class="brand-name">未蓝科技</text>
+        <text class="brand-slogan">陪伴每一次成长</text>
     </view>
 
-    <view class="form-area">
+    <!-- 表单卡片 -->
+    <view class="form-card">
         <t-input
             value="{{phone}}"
             bind:change="onPhoneInput"
             label="手机号"
-            type="tel"
+            type="number"
+            maxlength="{{11}}"
             placeholder="请输入手机号"
             clearable="{{true}}"
         />
+        <!-- 字段级错误：内联红字优先于 Toast -->
+        <view wx:if="{{phoneError}}" class="field-error">{{phoneError}}</view>
 
         <view class="code-row">
             <t-input
                 value="{{code}}"
                 bind:change="onCodeInput"
                 label="验证码"
+                type="number"
+                maxlength="{{6}}"
                 placeholder="请输入验证码"
                 clearable="{{true}}"
                 class="code-input"
             />
-            <t-button
-                theme="primary"
-                size="small"
-                disabled="{{sendCodeDisabled}}"
-                bind:tap="sendCode"
-                class="code-btn"
-            >{{buttonText}}</t-button>
+            <button
+                class="code-btn {{sendCodeDisabled ? 'code-btn-counting' : ''}}"
+                disabled="{{sendCodeDisabled || sending}}"
+                bindtap="sendCode"
+                hover-class="tapable-hover"
+            >{{sending ? '发送中…' : buttonText}}</button>
         </view>
 
-        <t-button theme="primary" block="{{true}}" bind:tap="login" class="login-btn">登录</t-button>
+        <t-button
+            theme="primary"
+            block="{{true}}"
+            loading="{{loading}}"
+            disabled="{{!canSubmit}}"
+            bind:tap="login"
+            class="login-btn"
+        >{{loading ? '登录中…' : '登 录'}}</t-button>
+
+        <!-- 隐私协议（P0 合规） -->
+        <view class="agreement" bindtap="onToggleAgree" hover-class="tapable-hover">
+            <view class="checkbox {{agreed ? 'checkbox-checked' : ''}}">
+                <t-icon wx:if="{{agreed}}" name="check" size="24rpx" color="#ffffff" />
+            </view>
+            <view class="agreement-text">
+                <text>我已阅读并同意</text>
+                <text class="link" catchtap="onViewProtocol" data-type="service">《用户服务协议》</text>
+                <text>和</text>
+                <text class="link" catchtap="onViewProtocol" data-type="privacy">《隐私政策》</text>
+            </view>
+        </view>
     </view>
+
+    <!-- 演示提示 -->
+    <view class="demo-tip">
+        <t-icon name="info-circle" size="28rpx" color="#9AA3AF" />
+        <text>演示环境：任意手机号 + 验证码 8888 即可登录</text>
+    </view>
+
+    <view class="safe-bottom"></view>
 </view>

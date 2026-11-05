@@ -9,6 +9,6 @@
     "t-image": "tdesign-miniprogram/image/image",
     "t-divider": "tdesign-miniprogram/divider/divider"
   },
-  "navigationBarTitleText": "个人中心",
+  "navigationBarTitleText": "我的",
   "navigationStyle": "custom"
 }

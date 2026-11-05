@@ -1,4 +1,5 @@
 {
     "usingComponents": {},
-    "navigationBarTitleText": "未蓝科技"
+    "navigationBarTitleText": "未蓝科技",
+    "enablePullDownRefresh": true
 }

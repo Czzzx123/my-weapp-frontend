@@ -1,85 +1,84 @@
 import api from '../../config/settings'
+import request from '../../utils/request'
+import { track } from '../../utils/track'
+
 var app = getApp()
+
+// 本地 mock 数据（后端接口未就绪时降级使用）
+// 字段约定：id-唯一标识, name-菜单名, icon-TDesign图标名, color-图标颜色,
+//          bg-图标底色, path-跳转页面(空=建设中), status-状态, badge-红点数字
+var MOCK_MENU = [
+    { id: 1, name: '课表',     icon: 'calendar',  color: '#2F6BED', bg: '#EAF1FF', path: '', badge: 0 },
+    { id: 2, name: '请假',     icon: 'time',      color: '#2BB673', bg: '#E8F8F1', path: '', badge: 0 },
+    { id: 3, name: '作业',     icon: 'edit',      color: '#7B61FF', bg: '#F1EDFF', path: '', badge: 0 },
+    { id: 4, name: '课时查询', icon: 'chart-bar', color: '#FF9A4D', bg: '#FFF3E8', path: '', badge: 0 },
+    { id: 5, name: '成绩单',   icon: 'file-1',    color: '#F5544B', bg: '#FEEDEC', path: '', badge: 0 },
+    { id: 6, name: '电子相册', icon: 'image',     color: '#2F6BED', bg: '#EAF1FF', path: '', badge: 0 },
+    { id: 7, name: '积分商城', icon: 'gift',      color: '#FF9A4D', bg: '#FFF3E8', path: '', badge: 0 }
+]
+
 Page({
     data: {
-        activityList: [
-          {
-            "id": 1,
-            "title": "秋季运动会",
-            "text": "秋季运动会",
-            "date": "2026-05-09",
-            "count": 0,
-            "score": 100,
-            "total_count": 20
-        },
-        {
-            "id": 3,
-            "title": "读书分享会",
-            "text": "读书分享，希望大家可以分享分享自己最近读的一些书籍",
-            "date": "2026-05-11",
-            "count": 0,
-            "score": 500,
-            "total_count": 10
-        },
-        {
-            "id": 2,
-            "title": "游泳马拉松",
-            "text": "游泳马拉松",
-            "date": "2026-05-13",
-            "count": 0,
-            "score": 10000,
-            "total_count": 30
-        }
+        menu_list: MOCK_MENU
+    },
 
-        ]
-    },
     onLoad() {
-        this.refresh()
+        this.fetchMenu()
     },
-    refresh() {
-        wx.showLoading({
-            mask: true,
-        })
-        wx.request({
-            url: api.activity,
-            method: 'GET',
-            success: (res) => {
-                this.setData({
-                    activityList: res.data
-                })
-            },
-            complete: () => {
-                wx.hideLoading()
-            }
+
+    onShow() {
+        track('page_view')   // page_id 自动取当前页 route；3s 去重
+    },
+
+    // 下拉刷新（activity.json 已开启 enablePullDownRefresh）
+    onPullDownRefresh() {
+        this.fetchMenu().then(function () {
+            wx.stopPullDownRefresh()
         })
     },
-    // 活动报名接口
-    handleSignup: function (event) {
-        // 1 校验用户是否登录
-        var info = app.globalData.userInfo
-        if (info) {
-            //2 处理报名按钮点击事件
-            var index = event.mark.id; // 获取当前点击的活动索引
-            console.log('点击了报名按钮，索引为：', index);
-            wx.request({
-                url: api.join,
-                method: 'POST',
-                data: {
-                    'id': index
-                },
-                header: {
-                    token: info.token
-                }, // 用户登录信息，带在请求头中
-                success: (res) => {
-                    wx.showToast({
-                        title: res.data.msg,
-                    })
+
+    // 接口优先、失败降级 mock（utils/request 统一封装）
+    fetchMenu() {
+        var that = this
+        return request({ url: api.menu, showLoading: false, showError: false })
+            .then((res) => {
+                var list = res && (res.data || res)
+                if (list && list.length) {
+                    that.setData({ menu_list: list.slice(0, 8) })
                 }
             })
-        } else {
-            wx.showToast({
-                title: '请先登录',
+            .catch(() => {
+                // 接口不可用，降级本地 mock 数据：必须让用户知道当前是离线数据（CR-E02）
+                console.log('[菜单] 后端接口未就绪，使用本地 mock 数据')
+                wx.showToast({ title: '当前展示离线数据', icon: 'none' })
             })
+    },
+
+    // 点击：有效路径直接跳；建设中统一用 Modal 说明（不再用 Toast）
+    // menu_click 字段严格对齐 PM 契约：has_path(Boolean) + status ∈ 'online'|'coming'
+    onMenuTap(e) {
+        var item = e.currentTarget.dataset.item
+        var hasPath = !!item.path
+        track('menu_click', {
+            item_id: item.id,
+            name: item.name,
+            has_path: hasPath,
+            status: hasPath ? 'online' : 'coming'
+        })
+        if (hasPath) {
+            wx.navigateTo({ url: item.path })
+            return
         }
+        track('dev_modal_view', { item_id: item.id, name: item.name, action: 'show' })
+        wx.showModal({
+            title: '敬请期待',
+            content: '「' + item.name + '」正在开发中，上线后第一时间通知您',
+            confirmText: '我知道了',
+            confirmColor: '#2F6BED',
+            showCancel: false,
+            success: function () {
+                track('dev_modal_view', { item_id: item.id, name: item.name, action: 'confirm' })
+            }
+        })
     }
 })

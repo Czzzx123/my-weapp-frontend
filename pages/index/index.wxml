@@ -1,43 +1,82 @@
 <!--首页-->
-<view class="container">
-    <view class="banner">
-        <swiper autoplay circular indicator-color="#ddd" interval="3000" style="height: 360rpx;">
-            <swiper-item wx:for="{{banner_list}}" wx:key="*this">
-                <image src="{{item.img}}" mode="aspectFill" style="width: 100%; height: 100%;" />
-            </swiper-item>
-        </swiper>
+<view class="page">
+
+    <!-- Banner 轮播：渐变卡片式（后端返回 img 时自动切换为图片模式） -->
+    <swiper class="banner-swiper"
+            autoplay
+            circular
+            indicator-dots
+            indicator-color="rgba(255,255,255,0.45)"
+            indicator-active-color="#ffffff"
+            interval="4000"
+            duration="400">
+        <swiper-item wx:for="{{banner_list}}" wx:key="index">
+            <!-- 图片模式：后端下发 img 时启用 -->
+            <image wx:if="{{item.img}}" class="banner-img" src="{{item.img}}" mode="aspectFill" lazy-load="{{true}}" />
+            <!-- 渐变文案模式：默认 -->
+            <view wx:else class="banner-card banner-{{item.theme || 'blue'}}">
+                <view class="banner-text">
+                    <text class="banner-tag">{{item.tag}}</text>
+                    <text class="banner-title">{{item.title}}</text>
+                    <text class="banner-sub">{{item.subtitle}}</text>
+                </view>
+                <view class="deco-circle deco-circle-1"></view>
+                <view class="deco-circle deco-circle-2"></view>
+            </view>
+        </swiper-item>
+    </swiper>
+
+    <!-- 公告通知卡（可关闭，当日关闭后不再弹出） -->
+    <view wx:if="{{noticeVisible}}" class="notice-card card">
+        <t-icon name="sound" size="36rpx" color="#2F6BED" />
+        <text class="notice-text">{{notice}}</text>
+        <view class="notice-close tapable" bindtap="closeNotice" aria-label="关闭公告">
+            <t-icon name="close" size="32rpx" color="#9AA3AF" />
+        </view>
     </view>
 
-    <!--通知-->
-    <t-notice-bar content="{{notice}}" prefixIcon="sound" theme="info"  visible="{{visible}}"  marquee="{{marquee1}}">
-
-    </t-notice-bar>
-
-    <!--上课日常-->
-    <view class="daily-section">
-        <view class="section-header">
-            <t-icon name="time" size="40rpx" color="#1890ff" />
+    <!-- 上课日常 -->
+    <view class="section-header">
+        <view class="section-left">
+            <view class="section-bar"></view>
             <text class="section-title">上课日常</text>
         </view>
+        <text class="section-more tapable" bindtap="gotoActivity">查看全部</text>
+    </view>
 
-        <view class="daily-card" wx:for="{{daily_list}}" wx:key="id">
+    <view class="daily-card card" wx:for="{{daily_list}}" wx:key="id">
+        <!-- 卡片头：标题 + 日期 -->
+        <view class="card-head">
+            <text class="card-title">{{item.title}}</text>
             <view class="card-date">
-                <t-icon name="calendar" size="28rpx" color="#ffffff" />
+                <t-icon name="calendar" size="26rpx" color="#9AA3AF" />
                 <text>{{item.date}}</text>
             </view>
-            <image class="card-img" src="{{item.img}}" mode="aspectFill" />
+        </view>
+
+        <!-- 课程标签 + 正文 -->
+        <view class="card-body">
+            <text class="course-tag course-{{item.theme}}">{{item.course}}</text>
             <view class="card-content">{{item.content}}</view>
-            <view class="card-footer">
-                <view class="action" bindtap="onCollect">
-                    <t-icon name="heart" size="36rpx" color="#999" />
-                    <text>收藏</text>
-                </view>
-                <view class="action" bindtap="onShare">
-                    <t-icon name="share" size="36rpx" color="#999" />
-                    <text>分享</text>
-                </view>
+        </view>
+
+        <!-- 操作区 -->
+        <view class="card-footer">
+            <view class="action tapable {{item.collected ? 'action-active' : ''}}"
+                  bindtap="onCollect"
+                  data-id="{{item.id}}">
+                <t-icon name="{{item.collected ? 'heart-filled' : 'heart'}}"
+                        size="36rpx"
+                        color="{{item.collected ? '#FF7A85' : '#9AA3AF'}}" />
+                <text>{{item.collected ? '已收藏' : '收藏'}}</text>
             </view>
+            <view class="footer-divider"></view>
+            <button class="action share-btn tapable" open-type="share" data-id="{{item.id}}">
+                <t-icon name="share" size="36rpx" color="#9AA3AF" />
+                <text>分享</text>
+            </button>
         </view>
     </view>
 
+    <view class="safe-bottom"></view>
 </view>

@@ -1,75 +1,67 @@
 <!--我的 界面-->
 <view class="page">
 
-  <!-- 顶部用户信息区域 -->
-  <view class="header" style="padding-top: {{statusBarHeight + 20}}px;">
-    <view class="header-top">
-      <view class="user-info" bindtap="{{userInfo ? '' : 'handleLogin'}}">
+  <!-- 自定义导航标题（与右上角胶囊对齐） -->
+  <view class="nav-title"
+        style="top: {{statusBarHeight}}px; height: {{navBarHeight}}px; line-height: {{navBarHeight}}px;">
+    我的
+  </view>
+
+  <!-- 品牌渐变头部（叠压式，统计卡上浮 -48rpx） -->
+  <view class="header" style="padding-top: {{statusBarHeight + navBarHeight}}px;">
+    <view class="user-row">
+      <view class="user-info" bindtap="handleUserTap" hover-class="tapable-hover">
         <image class="avatar" src="{{userInfo.avatar || '/images/icon/icon.png'}}" mode="aspectFill" />
         <view class="user-detail">
           <text class="username">{{userInfo.name || '游客'}}</text>
-          <text class="phone" wx:if="{{userInfo}}">151****108</text>
-          <text class="login-tip" wx:else>点击登录</text>
+          <text class="phone" wx:if="{{userInfo}}">{{userInfo.mobileMasked || '未蓝学员'}}</text>
+          <text class="login-tip" wx:else>登录后查看孩子学习数据</text>
         </view>
       </view>
-      <view class="header-actions">
-        <view class="action-btn" bindtap="handleMore">
-          <t-icon name="ellipsis" size="44rpx" color="#fff" />
-        </view>
 
+      <!-- 游客态：明确的登录按钮（替代不明确的"点击登录"文字） -->
+      <view wx:if="{{!userInfo}}" class="login-btn tapable" bindtap="handleLogin">
+        <text>登录 / 注册</text>
+      </view>
+      <view wx:else class="settings-btn tapable" bindtap="handleSetting">
+        <t-icon name="setting" size="44rpx" color="#ffffff" />
       </view>
     </view>
   </view>
 
-  <!-- 统计卡片 -->
+  <!-- 统计卡片（上浮叠压头部） -->
   <view class="card stats-card">
-    <view class="stats-row">
-      <view class="stat-item" wx:for="{{stats}}" wx:key="key">
-        <t-icon name="{{item.icon}}" size="48rpx" color="#1890ff" />
-        <text class="stat-value">{{item.value}}</text>
-        <text class="stat-label">{{item.label}}</text>
+    <view class="stat-item" wx:for="{{stats}}" wx:key="key">
+      <view class="stat-icon">
+        <t-icon name="{{item.icon}}" size="40rpx" color="#2F6BED" />
       </view>
-    </view>
-  </view>
-
-  <!-- 功能网格卡片 -->
-  <view class="card feature-card">
-    <view class="feature-grid">
-      <view 
-        class="feature-item" 
-        wx:for="{{features}}" 
-        wx:key="text"
-        data-index="{{index}}"
-        bindtap="handleFeature"
-      >
-        <view class="feature-icon-wrap">
-          <t-icon name="{{item.icon}}" size="48rpx" color="#1890ff" />
-        </view>
-        <text class="feature-text">{{item.text}}</text>
-      </view>
+      <text class="stat-value">{{item.value}}</text>
+      <text class="stat-label">{{item.label}}</text>
     </view>
   </view>
 
   <!-- 菜单列表卡片 -->
   <view class="card menu-card">
-    <view 
-      class="menu-item" 
-      wx:for="{{menuList}}" 
-      wx:key="text"
-      data-index="{{index}}"
-      bindtap="handleMenuTap"
-    >
+    <view class="menu-item"
+          wx:for="{{menuList}}"
+          wx:key="text"
+          data-item="{{item}}"
+          bindtap="handleMenuTap"
+          hover-class="tapable-hover">
       <view class="menu-left">
-        <t-icon name="{{item.icon}}" size="40rpx" color="#666" />
+        <t-icon name="{{item.icon}}" size="40rpx" color="#6B7280" />
         <text class="menu-text">{{item.text}}</text>
       </view>
-      <t-icon name="chevron-right" size="36rpx" color="#ccc" />
+      <!-- 有真实去向才显示箭头；建设中显示状态文字 -->
+      <t-icon wx:if="{{item.status === 'real'}}" name="chevron-right" size="32rpx" color="#9AA3AF" />
+      <text wx:else class="menu-status">即将上线</text>
     </view>
   </view>
 
-  <!-- 退出登录按钮 -->
-  <view class="logout-area" wx:if="{{userInfo}}">
-    <button class="logout-btn" bindtap="handleLogout">退出登录</button>
+  <!-- 退出登录：弱化处理，白卡内文字按钮 -->
+  <view wx:if="{{userInfo}}" class="card logout-card">
+    <button class="logout-btn tapable" bindtap="handleLogout">退出登录</button>
   </view>
 
+  <view class="safe-bottom"></view>
 </view>

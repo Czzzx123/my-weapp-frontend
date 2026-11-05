@@ -1,155 +1,155 @@
 /* 页面背景 */
 .page {
   min-height: 100vh;
-  background-color: #f5f5f5;
-  padding-bottom: 40rpx;
+  background-color: var(--wl-bg);
 }
 
-/* ===== 顶部用户信息区域 ===== */
+/* ===== 自定义导航标题（与右上角胶囊对齐） ===== */
+.nav-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: var(--wl-fs-h2);
+  font-weight: 600;
+  color: #ffffff;
+  z-index: 3;
+}
+
+/* ===== 品牌渐变头部（叠压式） ===== */
 .header {
-  background: linear-gradient(135deg, #e8f4ff 0%, #d0e8ff 100%);
-  padding: 0 32rpx 32rpx;
-  border-radius: 0 0 32rpx 32rpx;
+  background: var(--wl-brand-gradient);
+  padding: 0 var(--wl-sp-4) 88rpx;
+  border-radius: 0 0 var(--wl-r-l) var(--wl-r-l);
 }
 
-.header-top {
+.user-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24rpx;
+  padding-top: var(--wl-sp-3);
 }
 
 .user-info {
   display: flex;
   align-items: center;
   flex: 1;
+  min-width: 0;
 }
 
 .avatar {
-  width: 96rpx;
-  height: 96rpx;
+  width: 112rpx;
+  height: 112rpx;
   border-radius: 50%;
-  background-color: #e0e0e0;
-  margin-right: 24rpx;
-  border: 4rpx solid rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.3);
+  margin-right: var(--wl-sp-3);
+  border: 4rpx solid rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
 }
 
 .user-detail {
   display: flex;
   flex-direction: column;
-  gap: 8rpx;
 }
 
 .username {
-  font-size: 34rpx;
+  font-size: var(--wl-fs-h2);
   font-weight: 600;
-  color: #333;
+  color: #ffffff;
 }
 
 .phone {
-  font-size: 26rpx;
-  color: #999;
+  margin-top: 6rpx;
+  font-size: var(--wl-fs-sub);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .login-tip {
-  font-size: 26rpx;
-  color: #1890ff;
+  margin-top: 6rpx;
+  font-size: var(--wl-fs-sub);
+  color: rgba(255, 255, 255, 0.85);
 }
 
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 24rpx;
+/* 游客态登录按钮：白色反底胶囊 */
+.login-btn {
+  flex-shrink: 0;
+  padding: 14rpx 36rpx;
+  background: #ffffff;
+  border-radius: var(--wl-r-pill);
+  font-size: var(--wl-fs-sub);
+  font-weight: 600;
+  color: var(--wl-brand);
 }
 
-.action-btn {
-  position: relative;
+.settings-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 64rpx;
-  height: 64rpx;
+  width: 88rpx;
+  height: 88rpx;
+  flex-shrink: 0;
 }
 
-
-
-
-
-.verify-text {
-  font-size: 26rpx;
-  color: #1890ff;
+.tapable-hover {
+  opacity: 0.86;
+  transform: scale(0.98);
 }
 
-/* ===== 通用卡片样式 ===== */
-.card {
-  margin: 24rpx 32rpx 0;
-  background-color: #fff;
-  border-radius: 24rpx;
-  padding: 32rpx 24rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
-}
-
-/* ===== 统计卡片 ===== */
-.stats-row {
+/* ===== 统计卡片（上浮叠压） ===== */
+.stats-card {
   display: flex;
-  justify-content: space-around;
+  margin: -48rpx var(--wl-sp-3) var(--wl-sp-3);
+  position: relative;
+  z-index: 2;
+  padding: var(--wl-sp-4) var(--wl-sp-3);
+  box-shadow: var(--wl-shadow-float);
 }
 
 .stat-item {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12rpx;
+  gap: 8rpx;
 }
 
-.stat-value {
-  font-size: 36rpx;
-  font-weight: 600;
-  color: #333;
+.stat-item + .stat-item {
+  border-left: 1rpx solid var(--wl-divider);
 }
 
-.stat-label {
-  font-size: 24rpx;
-  color: #999;
-}
-
-/* ===== 功能网格卡片 ===== */
-.feature-grid {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.feature-item {
-  width: 25%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12rpx;
-  padding: 16rpx 0;
-}
-
-.feature-icon-wrap {
+.stat-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 80rpx;
-  height: 80rpx;
+  width: 72rpx;
+  height: 72rpx;
   border-radius: 50%;
-  background-color: rgba(24, 144, 255, 0.08);
+  background: var(--wl-brand-bg);
 }
 
-.feature-text {
-  font-size: 24rpx;
-  color: #666;
+.stat-value {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--wl-brand);
+}
+
+.stat-label {
+  font-size: var(--wl-fs-cap);
+  color: var(--wl-text-2);
 }
 
 /* ===== 菜单列表卡片 ===== */
+.menu-card {
+  margin: 0 var(--wl-sp-3) var(--wl-sp-3);
+  padding: 0 var(--wl-sp-3);
+}
+
 .menu-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 28rpx 8rpx;
-  border-bottom: 2rpx solid #f5f5f5;
+  padding: var(--wl-sp-3) 8rpx;
+  border-bottom: 1rpx solid var(--wl-divider);
 }
 
 .menu-item:last-child {
@@ -159,27 +159,36 @@
 .menu-left {
   display: flex;
   align-items: center;
-  gap: 20rpx;
+  gap: var(--wl-sp-2);
 }
 
 .menu-text {
   font-size: 30rpx;
-  color: #333;
+  color: var(--wl-text-1);
 }
 
-/* ===== 退出登录 ===== */
-.logout-area {
-  margin: 48rpx 32rpx 0;
+.menu-status {
+  font-size: var(--wl-fs-cap);
+  color: var(--wl-text-3);
+}
+
+/* ===== 退出登录（弱化：白卡内文字按钮，不做红描边） ===== */
+.logout-card {
+  margin: 0 var(--wl-sp-3) var(--wl-sp-3);
+  padding: 0;
 }
 
 .logout-btn {
   width: 100%;
-  height: 88rpx;
-  line-height: 88rpx;
+  height: 96rpx;
+  line-height: 96rpx;
   text-align: center;
-  font-size: 30rpx;
-  color: #ff4d4f;
-  background-color: #fff;
-  border: 2rpx solid #ff4d4f;
-  border-radius: 44rpx;
+  font-size: var(--wl-fs-body);
+  color: var(--wl-error);
+  background: transparent;
+  border: none;
+}
+
+.logout-btn::after {
+  border: none;
 }

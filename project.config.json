@@ -1,44 +1,51 @@
 {
-    "setting": {
-        "es6": true,
-        "postcss": true,
-        "minified": true,
-        "uglifyFileName": false,
-        "enhance": true,
-        "packNpmManually": true,
-        "packNpmRelationList": [
-            {
-                "packageJsonPath": "./package.json",
-                "miniprogramNpmDistDir": "./"
-            }
-        ],
-        "babelSetting": {
-            "ignore": [],
-            "disablePlugins": [],
-            "outputPath": ""
-        },
-        "useCompilerPlugins": false,
-        "minifyWXML": true,
-        "compileWorklet": false,
-        "uploadWithSourceMap": true,
-        "minifyWXSS": true,
-        "localPlugins": false,
-        "disableUseStrict": false,
-        "condition": false,
-        "swc": false,
-        "disableSWC": true
+  "setting": {
+    "es6": true,
+    "postcss": true,
+    "minified": true,
+    "ignoreUploadUnusedFiles": true,
+    "uglifyFileName": false,
+    "enhance": true,
+    "packNpmManually": true,
+    "packNpmRelationList": [
+      {
+        "packageJsonPath": "./package.json",
+        "miniprogramNpmDistDir": "./"
+      }
+    ],
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
     },
-    "compileType": "miniprogram",
-    "miniprogramRoot": "./",
-    "simulatorPluginLibVersion": {},
-    "packOptions": {
-        "ignore": [
-            { "type": "folder", "value": ".trunk" },
-            { "type": "folder", "value": "node_modules" }
-        ],
-        "include": []
-    },
-    "appid": "wx878ab2baaa9c34be",
-    "editorSetting": {},
-    "libVersion": "3.15.0"
+    "useCompilerPlugins": false,
+    "minifyWXML": true,
+    "compileWorklet": false,
+    "uploadWithSourceMap": true,
+    "minifyWXSS": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "condition": false,
+    "swc": false,
+    "disableSWC": true
+  },
+  "compileType": "miniprogram",
+  "miniprogramRoot": "./",
+  "simulatorPluginLibVersion": {},
+  "packOptions": {
+    "ignore": [
+      {
+        "value": ".trunk",
+        "type": "folder"
+      },
+      {
+        "value": "node_modules",
+        "type": "folder"
+      }
+    ],
+    "include": []
+  },
+  "appid": "wx878ab2baaa9c34be",
+  "editorSetting": {},
+  "libVersion": "3.15.0"
 }

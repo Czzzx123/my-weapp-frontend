@@ -1,25 +1,34 @@
+<!--学习服务-->
 <view class="container">
-    <view wx:for="{{activityList}}" wx:key="index" class="activity-card">
-        <view class="activity-content">
-            <view class="activity-title">{{item.title}}</view>
-            <view class="activity-info">
-                <t-icon name="user" size="28rpx" color="#999" />
-                <text>报名人数：{{item.count}} | 总人数：{{item.total_count}}</text>
-            </view>
-            <view class="activity-info">
-                <t-icon name="star" size="28rpx" color="#999" />
-                <text>获得积分：{{item.score}}</text>
-            </view>
-            <view class="activity-info">
-                <t-icon name="calendar" size="28rpx" color="#999" />
-                <text>{{item.date}}</text>
-            </view>
-            <view class="activity-description">{{item.text}}</view>
-        </view>
-        <t-button theme="primary" size="small" bind:tap="handleSignup" mark:id="{{item.id}}" class="signup-btn">报名</t-button>
+
+    <!-- 建设中提示（诚实表达，避免逐个点击才发现） -->
+    <view class="dev-tip">
+        <view class="dev-dot"></view>
+        <text>带圆点的服务正在建设中，即将陆续开放</text>
     </view>
-    <view wx:if="{{activityList.length === 0}}" class="empty">
-        <t-icon name="info-circle" size="80rpx" color="#ccc" />
-        <text class="empty-text">暂无活动</text>
+
+    <!-- 功能网格：4列 × 2行 = 8 格 -->
+    <view class="grid-wrap card">
+        <view class="grid-item {{item.path ? '' : 'grid-item-disabled'}}"
+              wx:for="{{menu_list}}"
+              wx:key="id"
+              data-item="{{item}}"
+              bindtap="onMenuTap"
+              hover-class="tapable-hover">
+            <view class="icon-wrap" style="background-color: {{item.bg || '#EAF1FF'}};">
+                <t-icon name="{{item.icon || 'app'}}" size="48rpx" color="{{item.color || '#2F6BED'}}" />
+                <view wx:if="{{!item.path}}" class="dot"></view>
+                <view wx:if="{{item.badge}}" class="badge">{{item.badge}}</view>
+            </view>
+            <text class="menu-label">{{item.name}}</text>
+        </view>
+
+        <!-- 第 8 格：占位，纯展示不可点 -->
+        <view class="grid-item grid-item-placeholder">
+            <view class="icon-wrap icon-wrap-placeholder">
+                <t-icon name="ellipsis" size="48rpx" color="#9AA3AF" />
+            </view>
+            <text class="menu-label menu-label-muted">敬请期待</text>
+        </view>
     </view>
 </view>

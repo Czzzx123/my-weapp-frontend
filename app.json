@@ -1,6 +1,5 @@
 {
     "pages": [
-        "pages/welcome/welcome",
         "pages/index/index",
         "pages/my/my",
         "pages/activity/activity",
@@ -10,13 +9,13 @@
         "navigationBarTitleText": "未蓝科技",
         "navigationBarBackgroundColor": "#fff",
         "enablePullDownRefresh": false,
-        "backgroundColor": "#f5f5f5",
+        "backgroundColor": "#F6F8FC",
         "navigationBarTextStyle": "black",
         "backgroundTextStyle": "dark"
     },
     "tabBar": {
-        "selectedColor": "#1890ff",
-        "color": "#999999",
+        "selectedColor": "#2F6BED",
+        "color": "#9AA3AF",
         "position": "bottom",
         "list": [{
                 "pagePath": "pages/index/index",
@@ -26,7 +25,7 @@
             },
             {
                 "pagePath": "pages/activity/activity",
-                "text": "活动",
+                "text": "学习服务",
                 "iconPath": "images/icon/aid.png",
                 "selectedIconPath": "images/icon/aid-o.png"
             },
