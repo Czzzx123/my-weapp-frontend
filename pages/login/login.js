@@ -356,6 +356,12 @@ Page({
       showError: false
     })
       .then(function (data) {
+        // 补号可能触发账号合并（该手机号已属于另一条账号），
+        // 合并后旧 token 指向的账号被删除，必须换成后端新签的这个
+        if (data && data.token) {
+          wx.setStorageSync('token', data.token)
+        }
+
         // 补号后孩子列表可能从空变成非空，用返回结果刷新本地缓存
         var parent = (data && data.parent) || {}
         var children = (data && data.children) || []
