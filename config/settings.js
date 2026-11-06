@@ -7,7 +7,7 @@ var env = 'dev'
 //   - 真机调试 / 手机预览：必须用电脑的**局域网 IP**，因为手机上的 127.0.0.1 指向手机自己
 // 局域网 IP 会随 WiFi 变化，换网络后要重新查（ipconfig）并改这里。
 // 后端也要同时满足两条：runserver 监听 0.0.0.0，且 .env 的 DJANGO_ALLOWED_HOSTS 含该 IP。
-var LAN_IP = '10.1.97.181'
+var LAN_IP = '10.1.67.108'
 
 var CONFIG = {
     dev: {
