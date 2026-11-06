@@ -10,9 +10,32 @@
   <!-- 品牌渐变头部（叠压式，统计卡上浮 -48rpx） -->
   <view class="header" style="padding-top: {{statusBarHeight + navBarHeight}}px;">
     <view class="user-row">
-      <view class="user-info" bindtap="handleUserTap" hover-class="tapable-hover">
-        <image class="avatar" src="{{userInfo.avatar || '/images/icon/icon.png'}}" mode="aspectFill" />
-        <view class="user-detail">
+      <view class="user-info">
+        <!--
+          头像：已登录用 button open-type="chooseAvatar" 包起来，点一下就能换。
+          微信自 2.27.1 起已不让程序静默拿用户头像（getUserProfile 只返回灰头像），
+          但官方给了这个「头像昵称填写能力」——用户点选时可以选「用微信头像」，
+          这是微信允许的唯一途径。
+          游客态不能用 button（点了会触发选图），所以用 image 兜底。
+        -->
+        <button wx:if="{{userInfo}}"
+                class="avatar-btn"
+                open-type="chooseAvatar"
+                bindchooseavatar="onChooseAvatar"
+                hover-class="avatar-btn-hover">
+          <image class="avatar"
+                 src="{{userInfo.avatar || '/images/icon/avatar-default.webp'}}"
+                 mode="aspectFill" />
+          <view class="avatar-edit-badge">
+            <t-icon name="camera" size="22rpx" color="#2F6BED" />
+          </view>
+        </button>
+        <image wx:else
+               class="avatar"
+               src="/images/icon/avatar-default.webp"
+               mode="aspectFill" />
+
+        <view class="user-detail" bindtap="handleUserTap" hover-class="tapable-hover">
           <text class="username">{{userInfo.name || '游客'}}</text>
           <!-- 已绑定孩子优先展示孩子，没绑定才退回到手机号 -->
           <text class="phone" wx:if="{{userInfo}}">{{userInfo.childSummary || userInfo.mobileMasked || '未绑定孩子'}}</text>
@@ -53,8 +76,8 @@
         <t-icon name="{{item.icon}}" size="40rpx" color="#6B7280" />
         <text class="menu-text">{{item.text}}</text>
       </view>
-      <!-- 有真实去向才显示箭头；建设中显示状态文字 -->
-      <t-icon wx:if="{{item.status === 'real'}}" name="chevron-right" size="32rpx" color="#9AA3AF" />
+      <!-- 有真实去向（含 action 类操作）才显示箭头；建设中显示状态文字 -->
+      <t-icon wx:if="{{item.status === 'real' || item.action}}" name="chevron-right" size="32rpx" color="#9AA3AF" />
       <text wx:else class="menu-status">即将上线</text>
     </view>
   </view>

@@ -87,4 +87,13 @@
     </view>
 
     <view class="safe-bottom"></view>
+
+    <!-- 完善资料引导：首次登录且昵称头像都为空时弹一次，可跳过 -->
+    <profile-guide
+        visible="{{guideVisible}}"
+        default-name="{{guideDefaultName}}"
+        nickname-value="{{guideNickname}}"
+        avatar-value="{{guideAvatar}}"
+        bind:done="onGuideDone"
+    />
 </view>

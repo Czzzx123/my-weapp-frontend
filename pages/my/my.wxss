@@ -47,6 +47,50 @@
   flex-shrink: 0;
 }
 
+/* 头像外层的 button：必须把所有默认样式清干净，否则会出现灰底和边框 */
+.avatar-btn {
+  position: relative;
+  display: block;
+  width: 112rpx;
+  height: 112rpx;
+  padding: 0;
+  margin: 0 var(--wl-sp-3) 0 0;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  line-height: 1;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+/* 微信 button 的默认 ::after 会画一圈边框，必须去掉 */
+.avatar-btn::after {
+  border: none;
+}
+
+.avatar-btn .avatar {
+  margin-right: 0;
+}
+
+.avatar-btn-hover {
+  opacity: 0.8;
+}
+
+/* 头像右下角的相机角标：提示「这里可以点」 */
+.avatar-edit-badge {
+  position: absolute;
+  right: -2rpx;
+  bottom: -2rpx;
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.12);
+}
+
 .user-detail {
   display: flex;
   flex-direction: column;

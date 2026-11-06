@@ -6,6 +6,10 @@ var app = getApp()
 
 var PHONE_REG = /^1[3-9]\d{9}$/
 
+// 引导弹层只弹一次的本地标记。
+// 不放到数据库：这只是 UI 引导状态，不是业务数据，加字段就要迁移，不值得。
+var GUIDE_FLAG = 'profileGuideShown'
+
 // 协议摘要（正式版全文接入后可替换为独立协议页）
 var AGREEMENT_TEXT = {
     service: '《用户服务协议》摘要\n\n1. 本平台为 K12 学生家长提供上课日常、学习服务、积分兑换等教育信息服务。\n2. 您应提供真实有效的手机号，用于接收验证码登录及课程通知。\n3. 禁止利用平台从事任何违法违规活动。\n4. 课程安排、课时与积分规则以机构实际公示为准。\n\n正式版上线前将接入完整协议全文。',
@@ -25,7 +29,13 @@ Page({
     wxLoading: false,      // 微信登录进行中
     countDown: 60,
     phoneError: '',        // 手机号字段级错误（内联红字优先于 Toast）
-    from: ''               // 来源页（登录成功后返回）
+    from: '',              // 来源页（登录成功后返回）
+
+    // 完善资料引导弹层（登录后弹一次，可跳过）
+    guideVisible: false,
+    guideDefaultName: '家长',
+    guideNickname: '',
+    guideAvatar: ''
   },
 
   // 定时器不放进 data，避免 setData 携带非可序列化对象
@@ -281,6 +291,7 @@ Page({
       that.setData({ loading: false, wxLoading: false })
 
       // 微信登录但还没有手机号 → 去看不到孩子，提醒一下（不强制，允许先逛逛）
+      // 注意顺序：补号优先级高于完善资料，两个弹层不能同时出现
       if (data.need_mobile) {
         wx.showModal({
           title: '完善信息',
@@ -302,8 +313,43 @@ Page({
         return
       }
 
+      // 昵称和头像都没设置过 → 弹一次完善资料引导
+      if (that.shouldShowGuide(data)) {
+        that.showGuide(data)
+        return
+      }
+
       that.leaveLoginPage()
     }, 800)
+  },
+
+  // 是否该弹「完善资料」引导。
+  // 条件：后端说没设置过（has_custom_profile=false）+ 本地没弹过
+  shouldShowGuide(data) {
+    var parent = (data && data.parent) || {}
+    if (parent.has_custom_profile) return false
+    if (wx.getStorageSync(GUIDE_FLAG)) return false
+    return true
+  },
+
+  showGuide(data) {
+    var parent = (data && data.parent) || {}
+    wx.setStorageSync(GUIDE_FLAG, 1)
+    this.setData({
+      guideVisible: true,
+      // 后端算好的兜底名（张小明家长 / 家长），用作输入框 placeholder
+      guideDefaultName: parent.display_name || '家长',
+      guideNickname: parent.nickname || '',
+      guideAvatar: parent.avatar || ''
+    })
+  },
+
+  // 引导弹层关闭（保存成功 或 点跳过）都走这里
+  onGuideDone(e) {
+    var skipped = !!(e && e.detail && e.detail.skipped)
+    this.setData({ guideVisible: false })
+    track('profile_action', { type: skipped ? 'guide_skip' : 'guide_done' })
+    this.leaveLoginPage()
   },
 
   // 按来源返回
@@ -371,6 +417,12 @@ Page({
           wx.showToast({ title: '已关联 ' + children.length + ' 个孩子', icon: 'none' })
         } else {
           wx.showToast({ title: '未找到孩子，请联系老师登记', icon: 'none' })
+        }
+
+        // 补号后同样给一次完善资料的机会（补号的人往往也是第一次来）
+        if (that.shouldShowGuide(data)) {
+          setTimeout(function () { that.showGuide(data) }, 600)
+          return
         }
         that.leaveLoginPage()
       })

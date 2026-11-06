@@ -5,15 +5,20 @@ App({
     },
 
     // 登录成功后调用：把后端返回的 parent + children 归一成前端使用的 userInfo
-    // 参数与 /user/login/ 、/user/bind_mobile/ 、/user/profile/ 的返回体对齐
+    // 参数与 /user/login/ 、/user/bind_mobile/ 、/user/profile/ 、/user/update_profile/ 的返回体对齐
     initUserInfo: function(parent, children) {
       var p = parent || {}
       var list = children || []
 
       var info = {
         id: p.id || 0,
-        name: p.nickname || '家长',
+        // display_name 是后端算好的兜底结果：昵称 > 孩子名+家长 > 家长。
+        // 前端不再自己拼，避免两处逻辑不一致。
+        name: p.display_name || p.nickname || '家长',
+        // nickname 保留「用户真实设置的值」，为空表示没设置过，用于判断要不要引导
+        nickname: p.nickname || '',
         avatar: p.avatar || '',
+        hasCustomProfile: !!p.has_custom_profile,
         role: p.role || 'parent',
         mobile: p.mobile || '',
         mobileMasked: this.maskMobile(p.mobile),
@@ -29,6 +34,13 @@ App({
       // 保存到本地存储
       wx.setStorageSync('userInfo', info)
       return info
+    },
+
+    // 把接口返回的 parent/children 归一化后写回，供「我的」页面改完资料立即刷新用
+    // profilePayload 就是接口的完整返回体
+    applyProfilePayload: function(payload) {
+      var data = payload || {}
+      return this.initUserInfo(data.parent || {}, data.children || [])
     },
 
     // 孩子摘要文案

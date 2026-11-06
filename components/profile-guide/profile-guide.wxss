@@ -1,0 +1,149 @@
+.guide {
+  background: #ffffff;
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 48rpx 40rpx calc(40rpx + env(safe-area-inset-bottom));
+}
+
+.guide-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40rpx;
+}
+
+.guide-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1F2733;
+}
+
+.guide-sub {
+  margin-top: 12rpx;
+  font-size: 26rpx;
+  color: #9AA3AF;
+}
+
+/* ===== 头像行 ===== */
+.guide-avatar-row {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 0 32rpx;
+}
+
+.guide-avatar-btn {
+  position: relative;
+  width: 128rpx;
+  height: 128rpx;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  line-height: 1;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+/* 微信 button 默认的 ::after 会画边框，必须清掉 */
+.guide-avatar-btn::after {
+  border: none;
+}
+
+.guide-avatar-hover {
+  opacity: 0.8;
+}
+
+.guide-avatar {
+  width: 128rpx;
+  height: 128rpx;
+  border-radius: 50%;
+  background: #F0F2F5;
+}
+
+.guide-avatar-badge {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.12);
+}
+
+.guide-avatar-tip {
+  margin-left: 28rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.guide-avatar-main {
+  font-size: 30rpx;
+  color: #1F2733;
+  font-weight: 500;
+}
+
+.guide-avatar-sub {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #9AA3AF;
+}
+
+/* ===== 昵称 ===== */
+.guide-field {
+  margin-bottom: 40rpx;
+}
+
+.guide-label {
+  display: block;
+  font-size: 26rpx;
+  color: #6B7280;
+  margin-bottom: 16rpx;
+}
+
+.guide-input {
+  width: 100%;
+  height: 96rpx;
+  padding: 0 28rpx;
+  box-sizing: border-box;
+  background: #F6F8FC;
+  border-radius: 16rpx;
+  font-size: 30rpx;
+  color: #1F2733;
+}
+
+.guide-placeholder {
+  color: #B4B2A9;
+}
+
+.guide-submit {
+  width: 100%;
+  height: 92rpx;
+  margin-top: 32rpx;
+  line-height: 92rpx;
+  background: #2F6BED;
+  color: #ffffff;
+  font-size: 32rpx;
+  font-weight: 600;
+  border-radius: 46rpx;
+  border: none;
+}
+
+.guide-submit::after {
+  border: none;
+}
+
+.guide-submit-hover {
+  opacity: 0.85;
+}
+
+.guide-skip {
+  margin-top: 28rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #9AA3AF;
+  padding: 16rpx;
+}

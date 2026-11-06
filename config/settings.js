@@ -38,6 +38,7 @@ module.exports = {
     login: rootUrl + '/user/login/',
     profile: rootUrl + '/user/profile/',
     bind_mobile: rootUrl + '/user/bind_mobile/',
+    update_profile: rootUrl + '/user/update_profile/',
     logout: rootUrl + '/user/logout/',
 
     // 服务菜单（后端未就绪，前端降级 mock）
