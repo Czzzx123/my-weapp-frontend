@@ -86,16 +86,26 @@ Component({
     },
 
     onSubmit(e) {
-      // 优先读 form 提交的值：微信在 blur 阶段做过内容安全检测后，
-      // 只有 form submit 里拿到的才是最终有效值
-      var fromForm = ''
-      if (e && e.detail && e.detail.value) {
-        fromForm = e.detail.value.nickname
+      // 用 form 提交时收集到的值，而不是 this.data.nickname。
+      //
+      // 关键点：**必须信任 form 的空值**。
+      // 微信在 blur 阶段异步做内容安全检测，未通过会直接清空 input；
+      // 清空动作不会再触发 bindinput，所以 this.data.nickname 里留的还是
+      // 那个违规的旧值。如果这里在「form 值为空」时 fallback 回 data，
+      // 就等于把刚被拦下的昵称又提交上去了 —— 整套兜底完全失效。
+      var hasFormValue = !!(e && e.detail && e.detail.value)
+      var fromForm = hasFormValue ? (e.detail.value.nickname || '') : this.data.nickname
+      var nickname = String(fromForm || '').trim()
+
+      // 区分「用户自己删空」和「被微信清空」：
+      // 手动删除会触发 bindinput，data.nickname 同步变空；
+      // 而内容安全清空不触发 bindinput，data 里仍是旧的非空值。
+      // 后者要明确告知用户，否则他会以为自己的输入莫名其妙消失了。
+      if (hasFormValue && !nickname && this.data.nickname) {
+        this.setData({ nickname: '' })
+        wx.showToast({ title: '昵称未通过审核，请换一个', icon: 'none' })
+        return
       }
-      var nickname = (fromForm !== undefined && fromForm !== null && fromForm !== ''
-        ? fromForm
-        : this.data.nickname) || ''
-      nickname = nickname.trim()
 
       if (nickname.length > NICKNAME_MAX) {
         wx.showToast({ title: '昵称最多 ' + NICKNAME_MAX + ' 个字', icon: 'none' })
