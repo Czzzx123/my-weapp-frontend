@@ -250,10 +250,29 @@ Page({
       },
       fail(err) {
         that.setData({ wxLoading: false })
-        // wx.login 本身失败极少见，一般是用户取消或基础库异常
+        // wx.login 需要向微信服务器换取一次性 code，**依赖网络**。
+        // 断网 / 飞行模式 / 微信服务异常都会走到这里。
+        // 注意：这一步失败时请求根本没发出去，所以不会走上面的 network 分支。
         console.error('[wx.login] fail:', err)
-        wx.showToast({ title: '微信登录未完成', icon: 'none' })
+        that.showWxLoginHelp()
       }
+    })
+  },
+
+  // wx.login 失败时的指引。
+  // 与 showNetworkHelp 的区别：那个是「手机有网但连不到我们后端」，
+  // 这个是「连微信服务器都没连上」，排查方向完全不同，不能混用一套文案。
+  showWxLoginHelp() {
+    wx.showModal({
+      title: '微信登录未完成',
+      content: '微信登录需要先联网换取登录凭证，这一步没有成功。\n\n' +
+               '请检查：\n' +
+               '1. 手机是否有网络（飞行模式、断网会导致失败）\n' +
+               '2. 微信是否正常，可尝试重启微信\n' +
+               '3. 稍等几秒再点一次',
+      showCancel: false,
+      confirmText: '我知道了',
+      confirmColor: '#2F6BED'
     })
   },
 
