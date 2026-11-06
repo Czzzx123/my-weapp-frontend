@@ -229,15 +229,37 @@ Page({
             that.doLoginSuccess(data)
           })
           .catch((err) => {
-            var msg = (err && err.msg) || '微信登录失败，请重试'
-            wx.showToast({ title: msg, icon: 'none' })
             that.setData({ wxLoading: false })
+            // 网络层失败要单独提示：真机调试最常见的失败就是手机连不到后端
+            if (err && err.type === 'network') {
+              that.showNetworkHelp()
+              return
+            }
+            wx.showToast({ title: (err && err.msg) || '微信登录失败，请重试', icon: 'none' })
           })
       },
-      fail() {
-        wx.showToast({ title: '微信登录未完成', icon: 'none' })
+      fail(err) {
         that.setData({ wxLoading: false })
+        // wx.login 本身失败极少见，一般是用户取消或基础库异常
+        console.error('[wx.login] fail:', err)
+        wx.showToast({ title: '微信登录未完成', icon: 'none' })
       }
+    })
+  },
+
+  // 真机连不上后端时的排查指引。开发期高频问题，写清楚比让用户猜有用
+  showNetworkHelp() {
+    wx.showModal({
+      title: '连接不到服务器',
+      content: '当前接口地址：\n' + api.base +
+               '\n\n真机调试请检查：\n' +
+               '1. 手机和电脑连同一个 WiFi\n' +
+               '2. 电脑防火墙放行 8000 端口\n' +
+               '3. config/settings.js 的 useLan 已设为 true\n' +
+               '4. 局域网 IP 没变（换网络会变）',
+      showCancel: false,
+      confirmText: '我知道了',
+      confirmColor: '#2F6BED'
     })
   },
 
