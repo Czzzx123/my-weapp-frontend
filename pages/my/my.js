@@ -6,9 +6,9 @@ Page({
   data: {
     // 用户信息
     userInfo: null,
-    // 统计数据（保持 2 项，不新增数据来源）
+    // 统计数据（真实数据来自登录返回；未接入的显示 --）
     stats: [
-      { key: 'course', value: '--', label: '我的课程', icon: 'video-library' },
+      { key: 'child', value: '--', label: '我的孩子', icon: 'user' },
       { key: 'points', value: '--', label: '我的积分', icon: 'star' }
     ],
     // 列表菜单：real=有真实去向；即将上线的标 soon
@@ -49,15 +49,15 @@ Page({
     track('page_view')   // page_id 自动取 route；is_login 由 track.js 注入
   },
 
-  // 加载用户信息：已登录显示真实积分；游客态显示 --
+  // 加载用户信息：已登录显示真实数据；游客态显示 --
   loadUserInfo() {
     var info = app.globalData.userInfo
     var stats = this.data.stats.map(function (s) {
-      if (info && s.key === 'points') {
-        s.value = info.score || 0
-      } else if (info && s.key === 'course') {
-        s.value = info.course || 0
+      if (info && s.key === 'child') {
+        // 孩子数量是登录接口直接返回的，不用额外请求
+        s.value = info.childCount || 0
       } else {
+        // 积分要等积分模块接入，先占位
         s.value = '--'
       }
       return s

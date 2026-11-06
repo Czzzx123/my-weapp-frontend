@@ -4,17 +4,11 @@ import { track } from '../../utils/track'
 
 var app = getApp()
 
-// mock 登录：后端未就绪时用这个账号演示
-var MOCK_ACCOUNT = {
-    mobile: '13800000000',
-    code: '8888'
-}
-
 var PHONE_REG = /^1[3-9]\d{9}$/
 
 // 协议摘要（正式版全文接入后可替换为独立协议页）
 var AGREEMENT_TEXT = {
-    service: '《用户服务协议》摘要\n\n1. 本平台为 K12 学生家长提供上课日常、学习服务、积分查询等教育信息服务。\n2. 您应提供真实有效的手机号，用于接收验证码登录及课程通知。\n3. 禁止利用平台从事任何违法违规活动。\n4. 课程安排、课时与积分规则以机构实际公示为准。\n\n正式版上线前将接入完整协议全文。',
+    service: '《用户服务协议》摘要\n\n1. 本平台为 K12 学生家长提供上课日常、学习服务、积分兑换等教育信息服务。\n2. 您应提供真实有效的手机号，用于接收验证码登录及课程通知。\n3. 禁止利用平台从事任何违法违规活动。\n4. 课程安排、课时与积分规则以机构实际公示为准。\n\n正式版上线前将接入完整协议全文。',
     privacy: '《隐私政策》摘要\n\n1. 我们仅收集登录所需的手机号，用于账号验证与课程服务。\n2. 不收集与提供服务无关的个人信息。\n3. 您的信息仅用于教育服务场景，不会向无关第三方提供。\n4. 您有权查询、更正、删除个人信息或注销账号。\n\n正式版上线前将接入完整政策全文。'
 }
 
@@ -28,9 +22,9 @@ Page({
     sendCodeDisabled: false,
     buttonText: '发送验证码',
     loading: false,
+    wxLoading: false,      // 微信登录进行中
     countDown: 60,
     phoneError: '',        // 手机号字段级错误（内联红字优先于 Toast）
-    demoMode: false,       // 演示降级态标记（CR-01：供埋点归因）
     from: ''               // 来源页（登录成功后返回）
   },
 
@@ -95,7 +89,6 @@ Page({
   sendCode() {
     var phone = this.data.phone
     if (!PHONE_REG.test(phone)) {
-      // 发送验证码阶段的校验拦截也计入 login_block（口径要求全覆盖）
       track('login_block', { reason: 'phone', stage: 'send_code' })
       this.setData({ phoneError: phone ? '手机号格式不正确' : '请输入手机号' })
       return
@@ -103,36 +96,29 @@ Page({
     this.setData({ phoneError: '', sending: true })
 
     var that = this
-    // 尝试请求后端；三分支倒计时口径（CR-01）
-    request({ url: api.send_sms + '?mobile=' + phone, showLoading: false, showError: false })
-      .then(function (data) {
-        if (data && data.code === 100) {
-          // ① 真实成功：60s
-          wx.showToast({ title: '验证码已发送', icon: 'none' })
-          that.startCountdown(60)
-        } else {
-          // ③ 真实业务失败：不启动倒计时，不罚等，按钮回可发送态
-          // 注意：此处禁止提示「当前展示离线数据」，否则用户会误以为拿到了可用验证码
-          wx.showToast({ title: (data && data.msg) || '发送失败，请重试', icon: 'none' })
-        }
+    request({
+      url: api.send_sms,
+      method: 'POST',
+      data: { mobile: phone },
+      showLoading: false,
+      showError: false
+    })
+      .then(function () {
+        wx.showToast({ title: '验证码已发送', icon: 'none' })
+        that.startCountdown(60)
       })
       .catch(function (err) {
-        // 区分业务失败与网络失败：业务失败绝不进入演示模式
-        if (err && err.type === 'business') {
-          wx.showToast({ title: err.msg || '发送失败，请重试', icon: 'none' })
-          return
-        }
-        // ② 降级演示态（网络失败/超时/后端未就绪）：30s + 演示标记
-        wx.showToast({ title: '演示模式：验证码 8888', icon: 'none', duration: 2000 })
-        that.setData({ demoMode: true })
-        that.startCountdown(30)
+        // 业务失败与网络失败都要如实告知，不做「演示模式」降级 ——
+        // 否则用户会以为真的收到了验证码
+        var msg = (err && err.msg) || '发送失败，请重试'
+        wx.showToast({ title: msg, icon: 'none' })
       })
       .finally(function () {
         that.setData({ sending: false })
       })
   },
 
-  // 启动倒计时（seconds：真实成功 60 / 演示降级 30）
+  // 启动倒计时
   startCountdown(seconds) {
     var total = seconds || 60
     this.setData({ sendCodeDisabled: true, countDown: total, buttonText: total + 's 后重发' })
@@ -156,14 +142,12 @@ Page({
     }
   },
 
+  // ---------------- 手机号 + 验证码登录 ----------------
   login() {
     var phone = this.data.phone.trim()
     var code = this.data.code.trim()
 
-    // login_submit：result ∈ success / blocked / failed（口径要求三种结果全覆盖）
     if (!this.data.agreed) {
-      // 首行校验协议：未勾选 0 次网络请求
-      // 口径：每次点击恰好 1 次 login_submit（blocked 点击瞬间上报）；合规拦截另发 login_block
       track('login_submit', {
         agreed: false,
         phone_valid: PHONE_REG.test(phone),
@@ -191,7 +175,6 @@ Page({
     this.refreshCanSubmit()
 
     var that = this
-    // 尝试后端登录
     request({
       url: api.login,
       method: 'POST',
@@ -200,88 +183,172 @@ Page({
       showError: false
     })
       .then((data) => {
-        // 后端返回 { code: 100, token, name, score, avatar } 这种结构
-        if (data && data.code === 100 && data.token) {
-          that.setData({ demoMode: false })   // 真实后端成功：重置演示态
-          that.doLoginSuccess(data)
-        } else {
-          // 业务错误，降级到 mock 登录
-          that.tryMockLogin(phone, code, 'business_error')
-        }
+        that.doLoginSuccess(data)
       })
       .catch((err) => {
-        // 后端已明确拒绝（验证码错误、账号不存在等）：必须如实报错，
-        // 不能降级成演示登录，否则"验证码错误"会变成"登录成功"
-        if (err && err.type === 'business') {
-          track('login_submit', {
-            agreed: true,
-            phone_valid: true,
-            result: 'failed',
-            reason: 'business_error',
-            demo_mode: false
-          })
-          wx.showToast({ title: err.msg || '登录失败，请重试', icon: 'none' })
-          that.setData({ loading: false })
-          that.refreshCanSubmit()
-          return
-        }
-        // 网络错误/后端未就绪，降级到 mock 登录
-        that.tryMockLogin(phone, code, 'network_error')
+        // 任何失败都如实报错，绝不降级成假登录
+        var msg = (err && err.msg) || '登录失败，请重试'
+        track('login_submit', {
+          agreed: true,
+          phone_valid: true,
+          result: 'failed',
+          reason: (err && err.type) || 'unknown'
+        })
+        wx.showToast({ title: msg, icon: 'none' })
+        that.setData({ loading: false })
+        that.refreshCanSubmit()
       })
   },
 
-  // mock 登录：演示模式下任意手机号 + 8888 即可登录
-  tryMockLogin(phone, code, result) {
-    if (code === MOCK_ACCOUNT.code) {
-      wx.showToast({ title: '演示模式登录成功', icon: 'none' })
-      this.setData({ demoMode: true })   // 让 doLoginSuccess 的 demo_mode 拿到真实状态
-      // 先存 token 让其他页面鉴权不炸
-      wx.setStorageSync('token', 'mock_token_' + Date.now())
-      this.doLoginSuccess({
-        token: 'mock_token',
-        name: phone.slice(-4) + '同学',
-        score: 666,
-        avatar: '',
-        mobile: phone
-      })
-    } else {
-      // 所有失败分支必须复位 loading，否则按钮卡死
-      track('login_submit', {
-        agreed: true,
-        phone_valid: true,
-        result: 'failed',
-        reason: result === 'network_error' ? 'network_error' : 'business_error',
-        demo_mode: this.data.demoMode   // 演示态语义：以数据实际来源为准（PM 口径）
-      })
-      wx.showToast({ title: '验证码错误（演示模式：8888）', icon: 'none' })
-      this.setData({ loading: false })
-      this.refreshCanSubmit()
+  // ---------------- 微信一键登录 ----------------
+  wxLogin() {
+    if (!this.data.agreed) {
+      wx.showToast({ title: '请先勾选并同意协议', icon: 'none' })
+      return
     }
+
+    var that = this
+    this.setData({ wxLoading: true })
+
+    wx.login({
+      success(res) {
+        if (!res.code) {
+          wx.showToast({ title: '微信登录失败，请重试', icon: 'none' })
+          that.setData({ wxLoading: false })
+          return
+        }
+
+        request({
+          url: api.login,
+          method: 'POST',
+          data: { wx_code: res.code },
+          showLoading: false,
+          showError: false
+        })
+          .then((data) => {
+            that.doLoginSuccess(data)
+          })
+          .catch((err) => {
+            var msg = (err && err.msg) || '微信登录失败，请重试'
+            wx.showToast({ title: msg, icon: 'none' })
+            that.setData({ wxLoading: false })
+          })
+      },
+      fail() {
+        wx.showToast({ title: '微信登录未完成', icon: 'none' })
+        that.setData({ wxLoading: false })
+      }
+    })
   },
 
   doLoginSuccess(data) {
+    // token 存本地，request.js 每次请求自动带在 header.token 里
     wx.setStorageSync('token', data.token)
-    app.initUserInfo(data.name, data.score || 0, data.avatar || '', data.mobile || this.data.phone)
+
+    var parent = data.parent || {}
+    var children = data.children || []
+
+    app.initUserInfo(parent, children)
+
     wx.showToast({ title: '登录成功', icon: 'success' })
-    track('login_submit', {
-      agreed: true,
-      phone_valid: true,
-      result: 'success',
-      demo_mode: this.data.demoMode
-    })
+    track('login_submit', { agreed: true, phone_valid: true, result: 'success' })
     track('feedback_action', { type: 'login_success', page_id: 'pages/login/login' })
+
     var that = this
     setTimeout(function () {
-      // 所有分支复位 loading（含成功分支）
-      that.setData({ loading: false })
-      // 按来源返回：my → switchTab 回我的；index 及其他 → 回首页
-      if (that.data.from === 'my') {
-        wx.switchTab({ url: '/pages/my/my' })
-      } else if (that.data.from === 'index') {
-        wx.switchTab({ url: '/pages/index/index' })
-      } else {
-        wx.reLaunch({ url: '/pages/index/index' })
+      that.setData({ loading: false, wxLoading: false })
+
+      // 微信登录但还没有手机号 → 去看不到孩子，提醒一下（不强制，允许先逛逛）
+      if (data.need_mobile) {
+        wx.showModal({
+          title: '完善信息',
+          content: '补充手机号后即可查看孩子的课程与课时。现在补充吗？',
+          confirmText: '去补充',
+          cancelText: '先逛逛',
+          confirmColor: '#2F6BED',
+          success: function (r) {
+            if (r.confirm) {
+              that.goBindMobile()
+              return
+            }
+            that.leaveLoginPage()
+          },
+          fail: function () {
+            that.leaveLoginPage()
+          }
+        })
+        return
       }
+
+      that.leaveLoginPage()
     }, 800)
+  },
+
+  // 按来源返回
+  leaveLoginPage() {
+    if (this.data.from === 'my') {
+      wx.switchTab({ url: '/pages/my/my' })
+    } else if (this.data.from === 'index') {
+      wx.switchTab({ url: '/pages/index/index' })
+    } else {
+      wx.reLaunch({ url: '/pages/index/index' })
+    }
+  },
+
+  // 微信登录但无手机号：引导补号（同页弹层，不另开页面）
+  goBindMobile() {
+    var that = this
+    wx.showModal({
+      title: '补充手机号',
+      editable: true,
+      placeholderText: '请输入报名时留的手机号',
+      confirmText: '提交',
+      cancelText: '先逛逛',
+      confirmColor: '#2F6BED',
+      success: function (res) {
+        if (!res.confirm) {
+          that.leaveLoginPage()
+          return
+        }
+        var mobile = (res.content || '').trim()
+        if (!PHONE_REG.test(mobile)) {
+          wx.showToast({ title: '手机号格式不正确', icon: 'none' })
+          that.leaveLoginPage()
+          return
+        }
+        that.submitBindMobile(mobile)
+      },
+      fail: function () {
+        that.leaveLoginPage()
+      }
+    })
+  },
+
+  submitBindMobile(mobile) {
+    var that = this
+    request({
+      url: api.bind_mobile,
+      method: 'POST',
+      data: { mobile: mobile },
+      showLoading: true,
+      showError: false
+    })
+      .then(function (data) {
+        // 补号后孩子列表可能从空变成非空，用返回结果刷新本地缓存
+        var parent = (data && data.parent) || {}
+        var children = (data && data.children) || []
+        app.initUserInfo(parent, children)
+
+        if (children.length) {
+          wx.showToast({ title: '已关联 ' + children.length + ' 个孩子', icon: 'none' })
+        } else {
+          wx.showToast({ title: '未找到孩子，请联系老师登记', icon: 'none' })
+        }
+        that.leaveLoginPage()
+      })
+      .catch(function (err) {
+        wx.showToast({ title: (err && err.msg) || '提交失败', icon: 'none' })
+        that.leaveLoginPage()
+      })
   }
 })

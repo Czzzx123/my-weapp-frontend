@@ -62,10 +62,28 @@
         </view>
     </view>
 
-    <!-- 演示提示 -->
+    <!-- 分隔线 -->
+    <view class="divider">
+        <view class="divider-line"></view>
+        <text class="divider-text">其他登录方式</text>
+        <view class="divider-line"></view>
+    </view>
+
+    <!-- 微信一键登录：走 wx.login() 静默取 code，无需授权弹窗 -->
+    <view class="wx-login-wrap">
+        <view class="wx-login-btn {{wxLoading ? 'wx-login-btn-loading' : ''}}"
+              bindtap="wxLogin"
+              hover-class="{{wxLoading ? '' : 'tapable-hover'}}">
+            <t-icon name="logo-wechat-stroke" size="40rpx" color="#07C160" />
+            <text class="wx-login-text">{{wxLoading ? '登录中…' : '微信一键登录'}}</text>
+        </view>
+        <view class="wx-login-tip">微信登录后可补充手机号，用于关联孩子的课程</view>
+    </view>
+
+    <!-- 开发提示 -->
     <view class="demo-tip">
         <t-icon name="info-circle" size="28rpx" color="#9AA3AF" />
-        <text>演示环境：任意手机号 + 验证码 8888 即可登录</text>
+        <text>开发模式：验证码固定 8888，暂未真实下发短信</text>
     </view>
 
     <view class="safe-bottom"></view>

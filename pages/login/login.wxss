@@ -132,12 +132,69 @@ page {
     color: var(--wl-brand);
 }
 
-/* ===== 演示提示 ===== */
+/* ===== 分隔线 ===== */
+.divider {
+    display: flex;
+    align-items: center;
+    padding: 0 24rpx;
+    margin: var(--wl-sp-6) 0 var(--wl-sp-4);
+}
+
+.divider-line {
+    flex: 1;
+    height: 1rpx;
+    background-color: var(--wl-border);
+}
+
+.divider-text {
+    padding: 0 var(--wl-sp-2);
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-3);
+}
+
+/* ===== 微信一键登录 ===== */
+.wx-login-wrap {
+    padding: 0 var(--wl-sp-1);
+}
+
+/* 自绘按钮：不依赖 t-button 的 theme 变体（1.17 打包后未生成 theme-light 样式） */
+.wx-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 96rpx;
+    background-color: #FFFFFF;
+    border: 1rpx solid var(--wl-border);
+    border-radius: var(--wl-r-pill);
+    box-shadow: 0 2rpx 12rpx rgba(15, 42, 92, 0.04);
+    transition: opacity 0.2s;
+}
+
+.wx-login-btn-loading {
+    opacity: 0.6;
+}
+
+.wx-login-text {
+    margin-left: 12rpx;
+    font-size: 30rpx;
+    font-weight: 500;
+    color: var(--wl-text-1);
+}
+
+.wx-login-tip {
+    margin-top: var(--wl-sp-2);
+    text-align: center;
+    font-size: 22rpx;
+    color: var(--wl-text-3);
+    line-height: 1.5;
+}
+
+/* ===== 开发提示 ===== */
 .demo-tip {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: var(--wl-sp-4);
+    margin-top: var(--wl-sp-5);
 }
 
 .demo-tip text {

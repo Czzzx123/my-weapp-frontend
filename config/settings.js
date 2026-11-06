@@ -22,10 +22,12 @@ module.exports = {
     banner: rootUrl + '/banner/',
     notice: rootUrl + '/notice/',
 
-    // 登录（阶段 1 后端就绪后接入）
+    // 登录（阶段 1 已完成）
     send_sms: rootUrl + '/user/send_sms/',
     login: rootUrl + '/user/login/',
-    quick_login: rootUrl + '/user/quick_login/',
+    profile: rootUrl + '/user/profile/',
+    bind_mobile: rootUrl + '/user/bind_mobile/',
+    logout: rootUrl + '/user/logout/',
 
     // 服务菜单（后端未就绪，前端降级 mock）
     menu: rootUrl + '/menu/'

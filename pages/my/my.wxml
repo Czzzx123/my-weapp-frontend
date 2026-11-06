@@ -14,7 +14,8 @@
         <image class="avatar" src="{{userInfo.avatar || '/images/icon/icon.png'}}" mode="aspectFill" />
         <view class="user-detail">
           <text class="username">{{userInfo.name || '游客'}}</text>
-          <text class="phone" wx:if="{{userInfo}}">{{userInfo.mobileMasked || '未蓝学员'}}</text>
+          <!-- 已绑定孩子优先展示孩子，没绑定才退回到手机号 -->
+          <text class="phone" wx:if="{{userInfo}}">{{userInfo.childSummary || userInfo.mobileMasked || '未绑定孩子'}}</text>
           <text class="login-tip" wx:else>登录后查看孩子学习数据</text>
         </view>
       </view>
