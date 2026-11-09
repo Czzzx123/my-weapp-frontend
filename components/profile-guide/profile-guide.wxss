@@ -23,6 +23,66 @@
   color: #9AA3AF;
 }
 
+/* ===== 隐私协议提示条 ===== */
+.guide-privacy {
+  margin-bottom: 32rpx;
+  padding: 24rpx 28rpx;
+  background: #FFF7E6;
+  border-radius: 16rpx;
+  border: 1rpx solid #FAC775;
+}
+
+.guide-privacy-text {
+  font-size: 26rpx;
+  line-height: 1.6;
+  color: #854F0B;
+}
+
+.guide-privacy-actions {
+  display: flex;
+  align-items: center;
+  margin-top: 20rpx;
+}
+
+.guide-privacy-link {
+  margin: 0;
+  padding: 0 24rpx 0 0;
+  height: auto;
+  line-height: 1.4;
+  background: transparent;
+  border: none;
+  font-size: 26rpx;
+  color: #2F6BED;
+}
+
+.guide-privacy-link::after {
+  border: none;
+}
+
+.guide-privacy-link-hover {
+  opacity: 0.7;
+}
+
+.guide-privacy-agree {
+  margin: 0;
+  padding: 0 28rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  background: #2F6BED;
+  color: #ffffff;
+  border: none;
+  border-radius: 30rpx;
+  font-size: 26rpx;
+}
+
+.guide-privacy-agree::after {
+  border: none;
+}
+
+.guide-privacy-agree-hover {
+  opacity: 0.85;
+}
+
 /* ===== 头像行 ===== */
 .guide-avatar-row {
   display: flex;

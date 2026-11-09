@@ -88,4 +88,19 @@
   </view>
 
   <view class="safe-bottom"></view>
+
+  <!--
+    资料编辑弹层。和登录页用的是同一个组件，区别只有 mode：
+    这里传 edit —— 不写「只弹一次」标记，每次点「修改昵称」都能打开。
+    昵称输入框必须是 input type="nickname" 才能拉起微信昵称浮层，
+    所以改昵称走这个组件，而不是 wx.showModal（那只是系统输入框）。
+  -->
+  <profile-guide
+      mode="edit"
+      visible="{{guideVisible}}"
+      default-name="{{guideDefaultName}}"
+      nickname-value="{{guideNickname}}"
+      avatar-value="{{guideAvatar}}"
+      bind:done="onGuideDone"
+  />
 </view>

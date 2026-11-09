@@ -1,7 +1,9 @@
 App({
     // 用来存放用户登录信息，以后在任意页面，通过 var app = getApp() 都能取到当前app
     globalData: {
-      userInfo: null
+      userInfo: null,
+      // 隐私协议状态，由 checkPrivacy() 填充
+      privacy: null
     },
 
     // 登录成功后调用：把后端返回的 parent + children 归一成前端使用的 userInfo
@@ -68,6 +70,34 @@ App({
     onLaunch(){
       var info = wx.getStorageSync('userInfo')
       this.globalData.userInfo = info || null
+      this.checkPrivacy()
+    },
+
+    // 隐私协议状态缓存在 globalData.privacy。
+    //
+    // 为什么要在启动时查一次：
+    // 未同意隐私协议时，input type="nickname" 不会报错也不会触发官方弹窗，
+    // 而是静默降级成 type="text"（官方明确说明的例外），用户完全无感知。
+    // 组件被打开时再查一次也行，但会闪一下；启动时查好，弹层里就能直接显示提示条。
+    //
+    // 基础库 < 2.32.3 未集成隐私功能，这些接口不存在，当作「无需授权」处理。
+    checkPrivacy: function() {
+      var that = this
+      if (typeof wx.getPrivacySetting !== 'function') {
+        this.globalData.privacy = { needAuthorization: false, contractName: '' }
+        return
+      }
+      wx.getPrivacySetting({
+        success: function(res) {
+          that.globalData.privacy = {
+            needAuthorization: !!res.needAuthorization,
+            contractName: res.privacyContractName || ''
+          }
+        },
+        fail: function() {
+          that.globalData.privacy = { needAuthorization: false, contractName: '' }
+        }
+      })
     }
 
   })

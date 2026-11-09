@@ -344,6 +344,10 @@ Page({
 
   // 是否该弹「完善资料」引导。
   // 条件：后端说没设置过（has_custom_profile=false）+ 本地没弹过
+  //
+  // 注意：这只管「登录后自动弹」这一种场景。
+  // 已经设过资料的家长要改昵称/头像，走「我的 → 修改昵称」打开同一个组件
+  // 的编辑模式（mode=edit），那条路径不受这里限制，可以反复打开。
   shouldShowGuide(data) {
     var parent = (data && data.parent) || {}
     if (parent.has_custom_profile) return false

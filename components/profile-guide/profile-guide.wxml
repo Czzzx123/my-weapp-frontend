@@ -1,19 +1,40 @@
 <!--
-  完善资料引导：登录后弹一次，可跳过。
-
-  为什么不做成强制流程：
-  家长进来的首要目的是看孩子课表和课时，强制填资料会直接损失转化。
-  这里只做「顺手帮你设一下」，设完或跳过都进首页。
+  资料弹层，两种用法：
+  - mode="guide"（登录页）：首次登录后弹一次，可跳过
+  - mode="edit"（我的页）：主动点「修改昵称」打开，可反复打开，有独立的「保存」按钮
 
   头像用 button open-type="chooseAvatar"，昵称用 input type="nickname" ——
   这两个是微信官方唯一允许的获取用户头像昵称的方式
   （getUserProfile 自基础库 2.27.1 起只返回灰头像和「微信用户」）。
+
+  隐私协议注意：未同意隐私协议时，input type="nickname" 不会报错，
+  而是静默降级成 type="text"，微信昵称浮层永远不出现。
+  所以下面有一条 needPrivacy 提示条 + 同意按钮，把这个静默失败变成可见的。
 -->
 <t-popup visible="{{visible}}" placement="bottom" bind:visible-change="onPopupVisibleChange">
   <view class="guide">
     <view class="guide-head">
-      <text class="guide-title">完善你的资料</text>
-      <text class="guide-sub">方便老师认出你，也方便你自己区分账号</text>
+      <text class="guide-title">{{mode === 'edit' ? '修改昵称' : '完善你的资料'}}</text>
+      <text class="guide-sub" wx:if="{{mode === 'edit'}}">点昵称可直接选用微信昵称，点头像还能换图</text>
+      <text class="guide-sub" wx:else>方便老师认出你，也方便你自己区分账号</text>
+    </view>
+
+    <!-- 隐私协议提示：只在微信明确说「还有待同意的协议」时出现。
+         用户点「同意并继续」后，微信才允许 nickname 输入框拉起微信昵称浮层。 -->
+    <view class="guide-privacy" wx:if="{{needPrivacy}}">
+      <view class="guide-privacy-text">
+        同意 {{privacyContractName}} 后，才能读取你的微信昵称
+      </view>
+      <view class="guide-privacy-actions">
+        <button class="guide-privacy-link"
+                hover-class="guide-privacy-link-hover"
+                bindtap="onOpenPrivacyContract">查看协议</button>
+        <!-- open-type 必须原样写 agreePrivacyAuthorization，微信据此记录同意状态 -->
+        <button class="guide-privacy-agree"
+                hover-class="guide-privacy-agree-hover"
+                open-type="agreePrivacyAuthorization"
+                bindagreeprivacyauthorization="onAgreePrivacy">同意并继续</button>
+      </view>
     </view>
 
     <!-- 头像：点一下可选用微信头像或相册图片 -->
@@ -47,18 +68,20 @@
                placeholder-class="guide-placeholder"
                maxlength="32"
                bindinput="onNicknameInput"
-               bindblur="onNicknameBlur" />
+               bindblur="onNicknameBlur"
+               bindfocus="onNicknameFocus" />
         <!-- 用 form-type=submit 承载提交：微信在 onBlur 时会异步做内容安全检测，
              未通过会清空 input，只有在 submit 时读到的值才可靠。
              注意 input 必须带 name，否则 form 的 e.detail.value 是 {}，
              等于这套兜底完全没接上（曾经漏过）。 -->
         <button class="guide-submit" form-type="submit" hover-class="guide-submit-hover">
-          保存并进入
+          {{mode === 'edit' ? '保存' : '保存并进入'}}
         </button>
       </form>
     </view>
 
-    <view class="guide-skip" bindtap="onSkip">
+    <!-- 编辑模式不必「跳过」——点遮罩关闭即可；引导模式才需要显式的跳过入口 -->
+    <view class="guide-skip" wx:if="{{mode !== 'edit'}}" bindtap="onSkip">
       <text>先跳过，以后再说</text>
     </view>
   </view>

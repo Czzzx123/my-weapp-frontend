@@ -31,6 +31,11 @@ Component({
     avatarValue: {
       type: String,
       value: ''
+    },
+    // guide = 登录后一次性引导（登录页用）；edit = 主动编辑，可反复打开（我的页用）
+    mode: {
+      type: String,
+      value: 'guide'
     }
   },
 
@@ -40,7 +45,16 @@ Component({
     avatarPreview: '',
     // chooseAvatar 拿到的临时路径，提交时才上传
     tempAvatarPath: '',
-    submitting: false
+    submitting: false,
+
+    // ---- 隐私协议状态 ----
+    // 未同意隐私协议时，input type="nickname" 会静默降级成 type="text"，
+    // 既不报错也不提示，用户只会觉得「微信昵称怎么不弹了」。
+    // 这两个字段就是用来把静默失败变成可见提示的。
+    needPrivacy: false,
+    privacyContractName: '《小程序用户隐私保护指引》',
+    // 同一次打开弹层只主动请求一次授权，避免反复弹窗
+    privacyAsked: false
   },
 
   observers: {
@@ -51,12 +65,84 @@ Component({
         nickname: nicknameValue || '',
         avatarPreview: avatarValue || '',
         tempAvatarPath: '',
-        submitting: false
+        submitting: false,
+        privacyAsked: false
       })
+      this.refreshPrivacy()
     }
   },
 
   methods: {
+    // ---------------- 隐私协议 ----------------
+
+    // 查询微信侧是否还有待同意的隐私协议。
+    // 基础库 < 2.32.3 不集成隐私功能，这些接口不存在，直接当作已授权。
+    refreshPrivacy() {
+      var that = this
+      if (typeof wx.getPrivacySetting !== 'function') {
+        that.setData({ needPrivacy: false })
+        return
+      }
+      wx.getPrivacySetting({
+        success: function (res) {
+          var need = !!res.needAuthorization
+          // agreePrivacyAuthorization 的 button 需要 2.32.3，
+          // 而 getPrivacySetting 也是 2.32.3 才有，两者同版本，能在一起判断。
+          // 但 if 条件里仍留一道 canIUse，避免某些定制客户端只实现了其中一个。
+          if (need && !wx.canIUse('button.open-type.agreePrivacyAuthorization')) {
+            need = false
+          }
+          that.setData({
+            needPrivacy: need,
+            privacyContractName: res.privacyContractName || '《小程序用户隐私保护指引》'
+          })
+        },
+        fail: function () {
+          // 查不到就当作不需要，不让用户卡在弹层里
+          that.setData({ needPrivacy: false })
+        }
+      })
+    },
+
+    // <button open-type="agreePrivacyAuthorization"> 的回调。
+    // 用户点完这个按钮，微信才记录「已同意」，之后 nickname 输入框才会拉起微信昵称。
+    onAgreePrivacy() {
+      this.setData({ needPrivacy: false })
+      wx.showToast({ title: '已同意，现在可以读取微信昵称', icon: 'none' })
+    },
+
+    onOpenPrivacyContract() {
+      if (typeof wx.openPrivacyContract !== 'function') return
+      wx.openPrivacyContract({ fail: function () {} })
+    },
+
+    // 点昵称输入框时的第二次机会：主动请求一次隐私授权。
+    // 已同意的用户会立即静默返回；未同意的会拉起微信官方弹窗。
+    // 不做这一步的话，输入框就是默默降级成普通文本框，完全无感知。
+    onNicknameFocus() {
+      var that = this
+      if (!this.data.needPrivacy || this.data.privacyAsked) return
+      if (typeof wx.requirePrivacyAuthorize !== 'function') return
+
+      this.setData({ privacyAsked: true })
+      wx.requirePrivacyAuthorize({
+        success: function () {
+          that.setData({ needPrivacy: false })
+        },
+        fail: function () {
+          // 用户拒绝。输入框此时已降级为普通文本，必须明确告知原因。
+          that.setData({ needPrivacy: true })
+          wx.showToast({
+            title: '未同意隐私协议，暂时读不到微信昵称，可以直接手输',
+            icon: 'none',
+            duration: 3000
+          })
+        }
+      })
+    },
+
+    // ---------------- 头像 ----------------
+
     // 头像选择：只存临时路径 + 本地预览，等点「保存」再上传。
     // 这样用户改了主意直接关掉，不会在服务器留下垃圾文件。
     onChooseAvatar(e) {
@@ -71,6 +157,8 @@ Component({
         tempAvatarPath: tempPath
       })
     },
+
+    // ---------------- 昵称 ----------------
 
     onNicknameInput(e) {
       this.setData({ nickname: e.detail.value })
@@ -113,13 +201,24 @@ Component({
       }
 
       if (this.data.submitting) return
-      this.setData({ submitting: true })
 
       var that = this
       var payload = {}
       // 昵称为空时不提交 —— 后端 nickname 不接受空串，
       // 而「没填」本来就该走 placeholder 的默认值
       if (nickname) payload.nickname = nickname
+
+      // 什么都没改：编辑模式下要给个反馈，否则用户以为保存成功了
+      if (!payload.nickname && !this.data.tempAvatarPath) {
+        if (this.data.mode === 'edit') {
+          wx.showToast({ title: '还没有做任何修改', icon: 'none' })
+        } else {
+          this.triggerEvent('done', { skipped: true })
+        }
+        return
+      }
+
+      this.setData({ submitting: true })
 
       this.saveProfile(payload, this.data.tempAvatarPath)
         .then(function () {
@@ -149,8 +248,6 @@ Component({
     // 先传头像（如果有），再提交昵称。合并成一次请求会更好，
     // 但 uploadFile 和 json 请求是两个通道，只能分两步。
     saveProfile(payload, tempAvatarPath) {
-      var that = this
-
       if (!tempAvatarPath) {
         if (!payload.nickname) {
           // 什么都没改，直接当完成处理

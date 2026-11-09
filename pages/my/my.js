@@ -1,11 +1,8 @@
 import { track } from '../../utils/track'
 import api from '../../config/settings'
-import request from '../../utils/request'
 import upload from '../../utils/upload'
 
 var app = getApp()
-
-var NICKNAME_MAX = 32
 
 Page({
   data: {
@@ -26,7 +23,13 @@ Page({
     ],
     // 自定义导航尺寸（按状态栏 + 胶囊实测计算，避免写死 44px）
     statusBarHeight: 20,
-    navBarHeight: 44
+    navBarHeight: 44,
+
+    // 资料编辑弹层（复用 profile-guide 组件，mode=edit）
+    guideVisible: false,
+    guideDefaultName: '家长',
+    guideNickname: '',
+    guideAvatar: ''
   },
 
   onLoad() {
@@ -126,56 +129,37 @@ Page({
 
   // ---------------- 昵称 ----------------
   //
-  // 用 wx.showModal 的 editable 模式而不是新开页面：
-  // 只需要改一个短文本，跳页会让用户丢失上下文，成本远高于收益。
+  // 为什么不用 wx.showModal 的 editable 模式：
+  // 那是微信的**系统文本输入框**，和 input type="nickname" 完全无关，
+  // 永远不会出现「使用微信昵称」的浮层。想拉起微信昵称，
+  // 只能用 input type="nickname"，而全项目只有 profile-guide 组件里有。
+  // 所以这里改成打开那个组件的编辑模式（mode=edit）。
   editNickname() {
-    var that = this
-    var current = (this.data.userInfo && this.data.userInfo.nickname) || ''
-
-    wx.showModal({
-      title: '修改昵称',
-      editable: true,
-      placeholderText: '最多 ' + NICKNAME_MAX + ' 个字',
-      content: current,
-      confirmText: '保存',
-      cancelText: '取消',
-      confirmColor: '#2F6BED',
-      success: function (res) {
-        if (!res.confirm) return
-
-        var nickname = (res.content || '').trim()
-        if (!nickname) {
-          wx.showToast({ title: '昵称不能为空', icon: 'none' })
-          return
-        }
-        if (nickname.length > NICKNAME_MAX) {
-          wx.showToast({ title: '昵称最多 ' + NICKNAME_MAX + ' 个字', icon: 'none' })
-          return
-        }
-        if (nickname === current) return
-
-        that.submitNickname(nickname)
-      }
+    var info = this.data.userInfo || {}
+    if (!info) {
+      this.handleLogin()
+      return
+    }
+    track('profile_action', { type: 'open_nickname_editor' })
+    this.setData({
+      guideVisible: true,
+      // 后端算好的兜底名（张小明家长 / 家长），用作 placeholder
+      guideDefaultName: info.name || '家长',
+      guideNickname: info.nickname || '',
+      guideAvatar: info.avatar || ''
     })
   },
 
-  submitNickname(nickname) {
-    var that = this
-    request({
-      url: api.update_profile,
-      method: 'POST',
-      data: { nickname: nickname },
-      showLoading: true,
-      showError: false
-    })
-      .then(function (data) {
-        that.applyPayload(data)
-        wx.showToast({ title: '昵称已更新', icon: 'success' })
-        track('profile_action', { type: 'nickname_success' })
-      })
-      .catch(function (err) {
-        wx.showToast({ title: (err && err.msg) || '保存失败，请重试', icon: 'none' })
-      })
+  // 编辑弹层关闭：保存成功或点遮罩取消都走这里
+  onGuideDone(e) {
+    var skipped = !!(e && e.detail && e.detail.skipped)
+    this.setData({ guideVisible: false })
+    if (skipped) return
+
+    // 保存成功：组件的 saveProfile 已经把最新资料写进 globalData，
+    // 这里重新读一次即可，不用再发请求
+    this.loadUserInfo()
+    wx.showToast({ title: '资料已更新', icon: 'success' })
   },
 
   // 把接口返回的完整 payload 写回全局 + 本页，改完资料立即生效
