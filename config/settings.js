@@ -32,6 +32,8 @@ module.exports = {
     // 基础内容
     banner: rootUrl + '/banner/',
     notice: rootUrl + '/notice/',
+    // 首页「上课日常」：课程/活动的公开宣传内容，匿名可读
+    learning: rootUrl + '/learning/',
 
     // 登录（阶段 1 已完成）
     send_sms: rootUrl + '/user/send_sms/',

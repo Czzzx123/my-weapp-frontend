@@ -125,7 +125,23 @@ page {
 }
 
 /* ============ 上课日常 ============ */
+/* 卡片本身不留内边距，让通栏图能贴到卡片左右边缘（圆角由 .card 的 overflow 处理）。
+   内边距下沉到 .daily-inner，图片和文字各管各的。 */
 .daily-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+/* 通栏图：固定高度裁切，图再高也不撑破卡片节奏 */
+.daily-img {
+    display: block;
+    width: 100%;
+    height: 340rpx;
+    background-color: var(--wl-divider);
+}
+
+/* 有图时，标题区与图片之间留出呼吸；无图时靠自身 padding 撑开 */
+.daily-inner {
     padding: var(--wl-sp-3) var(--wl-sp-3) 0;
 }
 
@@ -237,4 +253,19 @@ page {
 
 .share-btn::after {
     border: none;
+}
+
+/* ============ 空状态 ============ */
+.daily-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--wl-sp-8) var(--wl-sp-4);
+}
+
+.daily-empty-text {
+    margin-top: var(--wl-sp-2);
+    font-size: var(--wl-fs-sub);
+    color: var(--wl-text-3);
 }

@@ -49,5 +49,6 @@
         "t-input": "tdesign-miniprogram/input/input",
         "t-divider": "tdesign-miniprogram/divider/divider"
     },
-    "sitemapLocation": "sitemap.json"
+    "sitemapLocation": "sitemap.json",
+    "lazyCodeLoading": "requiredComponents"
 }

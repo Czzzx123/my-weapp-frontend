@@ -45,37 +45,60 @@
     </view>
 
     <view class="daily-card card" wx:for="{{daily_list}}" wx:key="id">
+        <!--
+            通栏图：课程/活动的实拍展示，放在标题下方、正文上方。
+            后端没配图时整块不渲染（img 为空串也走 else 分支），
+            卡片会自然回到纯文字版式，不会留一块空白。
+            模式用 aspectFill + 固定高度：运营上传的图比例各不相同，
+            裁切比留白好看，也不会把卡片高度撑得乱七八糟。
+        -->
+        <image wx:if="{{item.img}}"
+               class="daily-img"
+               src="{{item.img}}"
+               mode="aspectFill"
+               lazy-load="{{true}}"
+               binderror="onDailyImgError"
+               data-id="{{item.id}}" />
+
         <!-- 卡片头：标题 + 日期 -->
-        <view class="card-head">
-            <text class="card-title">{{item.title}}</text>
-            <view class="card-date">
-                <t-icon name="calendar" size="26rpx" color="#9AA3AF" />
-                <text>{{item.date}}</text>
+        <view class="daily-inner">
+            <view class="card-head">
+                <text class="card-title">{{item.title}}</text>
+                <view class="card-date">
+                    <t-icon name="calendar" size="26rpx" color="#9AA3AF" />
+                    <text>{{item.date}}</text>
+                </view>
+            </view>
+
+            <!-- 课程标签 + 正文 -->
+            <view class="card-body">
+                <text class="course-tag course-{{item.theme}}">{{item.course}}</text>
+                <view class="card-content">{{item.content}}</view>
+            </view>
+
+            <!-- 操作区 -->
+            <view class="card-footer">
+                <view class="action tapable {{item.collected ? 'action-active' : ''}}"
+                      bindtap="onCollect"
+                      data-id="{{item.id}}">
+                    <t-icon name="{{item.collected ? 'heart-filled' : 'heart'}}"
+                            size="36rpx"
+                            color="{{item.collected ? '#FF7A85' : '#9AA3AF'}}" />
+                    <text>{{item.collected ? '已收藏' : '收藏'}}</text>
+                </view>
+                <view class="footer-divider"></view>
+                <button class="action share-btn tapable" open-type="share" data-id="{{item.id}}">
+                    <t-icon name="share" size="36rpx" color="#9AA3AF" />
+                    <text>分享</text>
+                </button>
             </view>
         </view>
+    </view>
 
-        <!-- 课程标签 + 正文 -->
-        <view class="card-body">
-            <text class="course-tag course-{{item.theme}}">{{item.course}}</text>
-            <view class="card-content">{{item.content}}</view>
-        </view>
-
-        <!-- 操作区 -->
-        <view class="card-footer">
-            <view class="action tapable {{item.collected ? 'action-active' : ''}}"
-                  bindtap="onCollect"
-                  data-id="{{item.id}}">
-                <t-icon name="{{item.collected ? 'heart-filled' : 'heart'}}"
-                        size="36rpx"
-                        color="{{item.collected ? '#FF7A85' : '#9AA3AF'}}" />
-                <text>{{item.collected ? '已收藏' : '收藏'}}</text>
-            </view>
-            <view class="footer-divider"></view>
-            <button class="action share-btn tapable" open-type="share" data-id="{{item.id}}">
-                <t-icon name="share" size="36rpx" color="#9AA3AF" />
-                <text>分享</text>
-            </button>
-        </view>
+    <!-- 后台还没录入内容：明确告知，不要用假数据冒充 -->
+    <view wx:if="{{dailyEmpty}}" class="daily-empty card">
+        <t-icon name="image" size="64rpx" color="#D5DBE4" />
+        <text class="daily-empty-text">课程动态正在整理中，稍后再来看看</text>
     </view>
 
     <view class="safe-bottom"></view>
