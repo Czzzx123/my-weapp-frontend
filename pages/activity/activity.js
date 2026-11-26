@@ -17,7 +17,9 @@ import { track } from '../../utils/track'
 var MENU_LIST = [
     { id: 1, name: '课表',     icon: 'calendar',  color: '#2F6BED', bg: '#EAF1FF', path: '/pages/schedule/schedule?from=menu', badge: 0 },
     { id: 2, name: '上课记录', icon: 'history',   color: '#2BB673', bg: '#E8F8F1', path: '/pages/records/records?from=menu', badge: 0 },
-    { id: 3, name: '请假',     icon: 'time',      color: '#2BB673', bg: '#E8F8F1', path: '', badge: 0 },
+    // 指向记录页而不是请假表单：从菜单进来时没有「哪一节课」这个前提，
+    // 直接开一个空表单，家长填完必然提交失败。记录页里有「去课表请假」的入口。
+    { id: 3, name: '请假',     icon: 'time',      color: '#2BB673', bg: '#E8F8F1', path: '/pages/leave/records?from=menu', badge: 0 },
     { id: 4, name: '作业',     icon: 'edit',      color: '#7B61FF', bg: '#F1EDFF', path: '', badge: 0 },
     { id: 5, name: '课时查询', icon: 'chart-bar', color: '#FF9A4D', bg: '#FFF3E8', path: '/pages/hours/hours?from=menu', badge: 0 },
     { id: 6, name: '成绩单',   icon: 'file-1',    color: '#F5544B', bg: '#FEEDEC', path: '', badge: 0 },

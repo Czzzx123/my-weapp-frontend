@@ -6,7 +6,9 @@
         "pages/login/login",
         "pages/schedule/schedule",
         "pages/hours/hours",
-        "pages/records/records"
+        "pages/records/records",
+        "pages/leave/leave",
+        "pages/leave/records"
     ],
     "window": {
         "navigationBarTitleText": "未蓝科技",

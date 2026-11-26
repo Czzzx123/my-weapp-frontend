@@ -1,0 +1,206 @@
+/* 请假页 */
+
+page {
+    background-color: var(--wl-bg);
+}
+
+.page {
+    padding: var(--wl-sp-3);
+    padding-bottom: calc(var(--wl-sp-4) + env(safe-area-inset-bottom));
+    box-sizing: border-box;
+}
+
+/* ============ 未登录 ============ */
+.gate {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 96rpx var(--wl-sp-4);
+    text-align: center;
+}
+
+.gate-title {
+    margin-top: var(--wl-sp-3);
+    font-size: var(--wl-fs-h2);
+    font-weight: 600;
+    color: var(--wl-text-1);
+}
+
+.gate-sub {
+    margin-top: var(--wl-sp-1);
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-3);
+    line-height: 1.5;
+}
+
+.gate-btn {
+    margin-top: var(--wl-sp-4);
+    padding: 0 var(--wl-sp-8);
+    height: 72rpx;
+    line-height: 72rpx;
+    border-radius: var(--wl-r-pill);
+    background: var(--wl-brand-gradient);
+    color: #fff;
+    font-size: var(--wl-fs-body);
+    font-weight: 500;
+    box-shadow: var(--wl-shadow-float);
+}
+
+/* ============ 确认信息 ============ */
+.info-card {
+    padding: var(--wl-sp-2) var(--wl-sp-3);
+}
+
+.info-row {
+    display: flex;
+    align-items: baseline;
+    padding: var(--wl-sp-2) 0;
+    border-bottom: 1rpx solid var(--wl-divider);
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    width: 100rpx;
+    flex-shrink: 0;
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-3);
+}
+
+.info-value {
+    flex: 1;
+    min-width: 0;
+    font-size: var(--wl-fs-body);
+    color: var(--wl-text-1);
+    font-variant-numeric: tabular-nums;
+}
+
+.info-strong {
+    font-weight: 600;
+}
+
+/* ============ 原因 ============ */
+.reason-card {
+    margin-top: var(--wl-sp-3);
+    padding: var(--wl-sp-3);
+}
+
+.section-title {
+    display: block;
+    font-size: var(--wl-fs-body);
+    font-weight: 600;
+    color: var(--wl-text-1);
+}
+
+.section-sub {
+    display: block;
+    margin-top: 6rpx;
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-3);
+    line-height: 1.5;
+}
+
+/* 快捷原因：一行放得下就一行，放不下自动换行。
+   不用横向滚动 —— 滚动区在手机上很难被发现，家长会以为只有前两个选项。 */
+.quick-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--wl-sp-2);
+    margin-top: var(--wl-sp-3);
+}
+
+.quick-item {
+    padding: 12rpx var(--wl-sp-3);
+    border-radius: var(--wl-r-pill);
+    background-color: #F4F6FA;
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-2);
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.quick-active {
+    background-color: var(--wl-brand-bg);
+    color: var(--wl-brand);
+    font-weight: 500;
+}
+
+.reason-input {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 120rpx;
+    margin-top: var(--wl-sp-3);
+    padding: var(--wl-sp-2) var(--wl-sp-3);
+    border-radius: var(--wl-r-s);
+    background-color: #F7F9FC;
+    font-size: var(--wl-fs-sub);
+    color: var(--wl-text-1);
+    line-height: 1.6;
+}
+
+.reason-ph {
+    color: var(--wl-text-3);
+}
+
+/* ============ 规则说明 ============ */
+.rule-tip {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--wl-sp-2);
+    margin-top: var(--wl-sp-3);
+    padding: var(--wl-sp-3);
+    border-radius: var(--wl-r-m);
+    background-color: #FFF9EC;
+}
+
+.rule-text {
+    display: flex;
+    flex-direction: column;
+    gap: 6rpx;
+    font-size: var(--wl-fs-cap);
+    color: #96702C;
+    line-height: 1.6;
+}
+
+/* ============ 提交 ============ */
+.submit-wrap {
+    margin-top: var(--wl-sp-6);
+}
+
+.submit-btn {
+    height: 92rpx;
+    line-height: 92rpx;
+    border-radius: var(--wl-r-pill);
+    background: var(--wl-brand-gradient);
+    color: #fff;
+    font-size: var(--wl-fs-h2);
+    font-weight: 600;
+    box-shadow: var(--wl-shadow-float);
+    border: none;
+}
+
+.submit-btn::after {
+    border: none;
+}
+
+.submit-busy {
+    opacity: 0.6;
+    box-shadow: none;
+}
+
+.done-tip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--wl-sp-2);
+    margin-top: var(--wl-sp-6);
+    padding: var(--wl-sp-4);
+    font-size: var(--wl-fs-body);
+    color: var(--wl-success);
+    font-weight: 500;
+}
+
+.safe-bottom {
+    height: env(safe-area-inset-bottom);
+}

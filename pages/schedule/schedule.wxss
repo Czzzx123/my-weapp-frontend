@@ -338,6 +338,45 @@ page {
     color: var(--wl-text-3);
 }
 
+/* ============ 请假入口 ============ */
+.leave-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--wl-sp-2);
+    margin-top: var(--wl-sp-2);
+}
+
+.leave-btn {
+    display: flex;
+    align-items: center;
+    gap: 6rpx;
+    padding: 0 20rpx;
+    height: 56rpx;
+    line-height: 56rpx;
+    border-radius: var(--wl-r-pill);
+    /* 用浅底而不是描边：卡片里已经有一条时间轴和多种标签，
+       再加深色描边会让整张卡显得很花。 */
+    background-color: var(--wl-brand-bg);
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-brand);
+}
+
+/* 已请假：换成橙色，与「已请假」标签同色系。
+   保持蓝色的话家长会以为还没请、想再点一次。 */
+.leave-btn-done {
+    background-color: var(--wl-accent-bg);
+    color: #C4701F;
+}
+
+.leave-badge {
+    display: flex;
+    align-items: center;
+    gap: 6rpx;
+    margin-top: var(--wl-sp-2);
+    font-size: var(--wl-fs-cap);
+    color: #C4701F;
+}
+
 /* ============ 底部说明 ============ */
 .foot-tip {
     padding: var(--wl-sp-2) var(--wl-sp-3) var(--wl-sp-4);

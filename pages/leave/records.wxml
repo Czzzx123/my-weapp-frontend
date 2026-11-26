@@ -1,0 +1,73 @@
+<!--请假记录：家长查「我请过哪几次」-->
+<view class="page">
+
+    <view wx:if="{{!logged}}" class="gate card">
+        <t-icon name="calendar" size="88rpx" color="#D5DBE4" />
+        <text class="gate-title">登录后查看请假记录</text>
+        <text class="gate-sub">记录和孩子的课表关联，需要先登录</text>
+        <view class="gate-btn tapable" bindtap="gotoLogin">去登录</view>
+    </view>
+
+    <view wx:elif="{{loading}}" class="state card">
+        <text class="state-text">正在加载…</text>
+    </view>
+
+    <view wx:elif="{{loadError}}" class="state card">
+        <t-icon name="wifi-off" size="72rpx" color="#D5DBE4" />
+        <text class="state-text">加载失败，请检查网络</text>
+        <view class="state-btn tapable" bindtap="retry">重试</view>
+    </view>
+
+    <!-- 一条记录都没有：不是错误，是还没请过假 -->
+    <view wx:elif="{{groups.length === 0}}" class="state card">
+        <t-icon name="calendar" size="72rpx" color="#D5DBE4" />
+        <text class="state-text">还没有请假记录</text>
+        <text class="state-sub">在课表里点「请假」就能提交</text>
+        <view class="state-btn tapable" bindtap="gotoSchedule">去看课表</view>
+    </view>
+
+    <block wx:else>
+        <view class="item card" wx:for="{{groups}}" wx:key="id">
+            <view class="item-head">
+                <view class="item-when">
+                    <text class="item-date">{{item.date_text}}</text>
+                    <text class="item-time">{{item.time_text}}</text>
+                </view>
+                <view class="tag {{item.is_active ? 'tag-active' : 'tag-cancelled'}}">
+                    {{item.status_label}}
+                </view>
+            </view>
+
+            <view class="item-body">
+                <view class="item-line">
+                    <text class="item-key">学生</text>
+                    <text class="item-val">{{item.student_name}}</text>
+                </view>
+                <view class="item-line">
+                    <text class="item-key">班级</text>
+                    <text class="item-val">{{item.class_name}}</text>
+                </view>
+                <view class="item-line" wx:if="{{item.reason}}">
+                    <text class="item-key">原因</text>
+                    <text class="item-val">{{item.reason}}</text>
+                </view>
+            </view>
+
+            <!-- 只给「已请假」的显示撤销。已撤销的再点只会报错，
+                 摆一个点了就报错的按钮比不摆更差。 -->
+            <view wx:if="{{item.can_cancel}}" class="item-foot">
+                <view class="cancel-btn tapable"
+                      data-item="{{item}}"
+                      bindtap="onCancel">撤销请假</view>
+                <text class="cancel-hint">撤销后这节课会恢复正常提醒</text>
+            </view>
+        </view>
+
+        <view class="foot-tip">
+            <text wx:if="{{hasActive}}">开课后不能再撤销，有变化请直接联系老师</text>
+            <text wx:else>请假不扣课时，也不会催你送孩子</text>
+        </view>
+    </block>
+
+    <view class="safe-bottom"></view>
+</view>

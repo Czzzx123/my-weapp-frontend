@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "请假记录",
+  "navigationBarBackgroundColor": "#ffffff",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#F6F8FC",
+  "enablePullDownRefresh": true
+}

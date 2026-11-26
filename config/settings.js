@@ -53,6 +53,12 @@ module.exports = {
     // notify_config：订阅消息模板 id 下发（匿名可读，模板没配时 enabled=false）
     notify_config: rootUrl + '/notify_config/',
 
+    // 请假（写操作，必须登录）
+    // 口径：提交即生效（不走审批）、开课后不能请、不扣课时
+    leave_submit: rootUrl + '/leave/submit/',
+    leave_cancel: rootUrl + '/leave/cancel/',
+    leave_list: rootUrl + '/leave/list/',
+
     // 服务菜单（后端未就绪，前端降级 mock）
     menu: rootUrl + '/menu/'
 }

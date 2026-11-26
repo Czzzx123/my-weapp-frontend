@@ -108,6 +108,38 @@
                         <t-icon name="usergroup" size="24rpx" color="#9AA3AF" />
                         <text>{{item.student_names}}</text>
                     </view>
+
+                    <!-- 已请假标记：家长请完假回来必须能看到痕迹，
+                         否则没法确认到底请成没请。 -->
+                    <view wx:if="{{item.has_leave}}" class="leave-badge">
+                        <t-icon name="check-circle" size="24rpx" color="#C4701F" />
+                        <text>{{item.is_multi ? item.leave_names + ' 已请假' : '已请假'}}</text>
+                    </view>
+
+                    <!-- 请假入口。
+                         **停课的时段不给** —— 课本来就不上，请假没有意义，
+                         给了只会让家长以为「停课还得我自己请个假」。
+                         多个孩子时逐个列出，否则不知道给谁请。
+                         用 catchtap 而不是 bindtap：卡片本身绑了点击（看停课说明），
+                         不拦住就会顺带触发父级，弹出不该弹的提示。 -->
+                    <view wx:if="{{!item.is_suspended}}" class="leave-row">
+                        <view wx:for="{{item.students}}"
+                              wx:for-item="stu"
+                              wx:key="id"
+                              class="leave-btn {{stu.on_leave ? 'leave-btn-done' : ''}} tapable"
+                              catchtap="onLeaveTap"
+                              data-session-id="{{item.session_id}}"
+                              data-student-id="{{stu.id}}"
+                              data-student-name="{{stu.name}}"
+                              data-class-name="{{item.class_name}}"
+                              data-time-text="{{item.start_time}}-{{item.end_time}}"
+                              data-date="{{day.date_iso}}"
+                              data-on-leave="{{stu.on_leave ? 1 : 0}}">
+                            <t-icon name="calendar" size="24rpx"
+                                    color="{{stu.on_leave ? '#C4701F' : '#2F6BED'}}" />
+                            <text>{{item.is_multi ? stu.name : ''}}{{stu.on_leave ? '已请假' : '请假'}}</text>
+                        </view>
+                    </view>
                 </view>
             </view>
         </view>

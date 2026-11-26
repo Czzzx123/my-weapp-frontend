@@ -1,0 +1,78 @@
+<!--请假：确认信息 + 填原因 + 提交-->
+<view class="page">
+
+    <!-- 未登录 -->
+    <view wx:if="{{!logged}}" class="gate card">
+        <t-icon name="calendar" size="88rpx" color="#D5DBE4" />
+        <text class="gate-title">登录后才能请假</text>
+        <text class="gate-sub">请假记录会和孩子的课表关联，需要先登录</text>
+        <view class="gate-btn tapable" bindtap="gotoLogin">去登录</view>
+    </view>
+
+    <block wx:else>
+        <!-- 确认要请哪一节课。这一块不能省：
+             家长从课表点进来时可能记错是哪天，先让他看到完整信息再提交，
+             比提交完才发现请错要好得多。 -->
+        <view class="card info-card">
+            <view class="info-row">
+                <text class="info-label">学生</text>
+                <text class="info-value info-strong">{{studentName || '—'}}</text>
+            </view>
+            <view class="info-row">
+                <text class="info-label">班级</text>
+                <text class="info-value">{{className || '—'}}</text>
+            </view>
+            <view class="info-row">
+                <text class="info-label">时间</text>
+                <text class="info-value">{{dateText}} {{timeText}}</text>
+            </view>
+        </view>
+
+        <!-- 原因 -->
+        <view class="card reason-card">
+            <text class="section-title">请假原因</text>
+            <text class="section-sub">选一个，或者自己写。不填也可以提交。</text>
+
+            <view class="quick-list">
+                <view wx:for="{{quickReasons}}" wx:key="*this"
+                      class="quick-item tapable {{reason === item ? 'quick-active' : ''}}"
+                      data-text="{{item}}"
+                      bindtap="onQuickReason">{{item}}</view>
+            </view>
+
+            <textarea class="reason-input"
+                      value="{{reason}}"
+                      placeholder="补充说明（可不填）"
+                      placeholder-class="reason-ph"
+                      maxlength="128"
+                      bindinput="onReasonInput"
+                      auto-height
+                      disable-default-padding />
+        </view>
+
+        <!-- 规则说明。放在提交按钮**上方**：
+             放到下方家长看不到，提交后才发现「怎么不能撤了」就容易起争执。 -->
+        <view class="rule-tip">
+            <t-icon name="info-circle" size="28rpx" color="#9AA3AF" />
+            <view class="rule-text">
+                <text>这节课不扣课时，也不会再提醒你送孩子。</text>
+                <text>开课后不能再请、也不能撤，有情况请直接联系老师。</text>
+            </view>
+        </view>
+
+        <view wx:if="{{done}}" class="done-tip card">
+            <t-icon name="check-circle" size="40rpx" color="#2BB673" />
+            <text>已提交请假</text>
+        </view>
+
+        <view wx:else class="submit-wrap">
+            <button class="submit-btn tapable {{submitting ? 'submit-busy' : ''}}"
+                    bindtap="onSubmit"
+                    disabled="{{submitting}}">
+                {{submitting ? '提交中…' : '确认请假'}}
+            </button>
+        </view>
+    </block>
+
+    <view class="safe-bottom"></view>
+</view>

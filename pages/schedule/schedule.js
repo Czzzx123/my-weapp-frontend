@@ -49,6 +49,19 @@ function minutesOf(t) {
     return (parseInt(parts[0], 10) || 0) * 60 + (parseInt(parts[1], 10) || 0)
 }
 
+// Date → 'YYYY-MM-DD'
+//
+// **不能用 toISOString().slice(0,10)**：那个方法按 UTC 算，
+// 东八区在 00:00~08:00 之间会退到前一天，家长半夜请假会请到昨天。
+// 手拼本地年月日是唯一安全的做法。
+function isoDate(d) {
+    var m = d.getMonth() + 1
+    var day = d.getDate()
+    return d.getFullYear() + '-' +
+        (m < 10 ? '0' + m : m) + '-' +
+        (day < 10 ? '0' + day : day)
+}
+
 // 把接口的扁平列表整理成「按天分组的纵向列表」。
 //
 // 两个刻意的处理：
@@ -71,6 +84,10 @@ function buildGroups(list) {
                 diff: info.diff,
                 day_label: dayLabel(w, info.diff, today),
                 date_text: (info.date.getMonth() + 1) + '月' + info.date.getDate() + '日',
+                // 请假接口要的是 YYYY-MM-DD。在这里就算好，
+                // 不要在点击那一刻用 new Date() 重算 —— 页面可能已经开了很久
+                // （家长切到别的应用再回来），重算会算出另一天。
+                date_iso: isoDate(info.date),
                 is_today: info.diff === 0,
                 items: [],
                 // session_id → 在 items 里的下标，用来合并兄弟姐妹
@@ -90,12 +107,20 @@ function buildGroups(list) {
                 it.student_names += '、' + raw.student_name
                 it.student_count += 1
             }
+            // 兄弟姐妹报同一个班时，请假得能分清给谁请。
+            // 只拼名字不留 id 的话，是没法按下「请假」的。
+            it.students.push({
+                id: raw.student_id,
+                name: raw.student_name || ''
+            })
             it.is_multi = it.student_count > 1
             return
         }
 
         var item = {
             session_id: raw.session_id,
+            // 请假要用：只留名字不够，接口要的是 student_id
+            students: [{ id: raw.student_id, name: raw.student_name || '' }],
             class_name: raw.class_name || '',
             course_name: raw.course_name || '',
             teacher: raw.teacher || '',
@@ -132,6 +157,52 @@ function buildGroups(list) {
     return groups
 }
 
+// 把「哪一天哪节课请过假」叠到课表卡片上。
+//
+// 为什么要叠这个：家长提交完请假返回课表，卡片如果和之前长得一模一样，
+// 他没法确认自己到底请成没请 —— 而「请了假系统还来催」正是这次要解决的问题。
+//
+// 匹配必须三个字段全等：session_id + student_id + date。
+//   · 只匹配 session_id → 上周请的假会标到这周
+//   · 只匹配 date      → 同一天另一个时段的假会串到这节课上
+// 两者都会让家长看到「明明没请假却显示已请假」，比不标更糟。
+//
+// **即使没有任何请假记录，也要走完整个循环**，把 has_leave / on_leave
+// 显式设成 false。直接 return 的话这些字段是 undefined，
+// 而 WXML 里 `data-on-leave="{{stu.on_leave ? 1 : 0}}"` 拿到 undefined
+// 会传 '0'、`wx:if` 也判成假 —— 看起来「能用」，但只要哪天有人在
+// JS 里写成 `=== false` 或 `!x` 取反，行为就会跟着数据有无而变。
+function markLeaves(groups, leaves) {
+    // key: 'sessionId|studentId|date' —— 拼字符串比嵌套对象好写也好调试
+    var active = {}
+    ;(leaves || []).forEach(function (x) {
+        if (x.status !== 'active') return          // 撤销的不算
+        active[x.session_id + '|' + (x.student && x.student.id) + '|' + x.date] = true
+    })
+
+    groups.forEach(function (g) {
+        var dateKey = g.date_iso
+        g.items.forEach(function (it) {
+            var names = []
+            it.students.forEach(function (s) {
+                // 没有 date_iso 就一律按未请假处理，不要拿空串去拼 key ——
+                // 空串会匹配到 date 也是空串的脏数据
+                var hit = dateKey
+                    ? !!active[it.session_id + '|' + s.id + '|' + dateKey]
+                    : false
+                s.on_leave = hit
+                if (hit) names.push(s.name)
+            })
+            it.leave_names = names.join('、')
+            it.has_leave = names.length > 0
+            // 全员请假才把整张卡置灰；部分请假只是标记出来 ——
+            // 全灰会让家长以为整个班停课了
+            it.all_on_leave = it.has_leave && names.length === it.students.length
+        })
+    })
+    return groups
+}
+
 Page({
     data: {
         logged: false,
@@ -157,6 +228,7 @@ Page({
     onShow() {
         track('page_view', { page_id: 'schedule' })
         var logged = !!getApp().globalData.userInfo
+
         this.setData({ logged: logged })
         if (logged) {
             this.fetchSchedule()
@@ -178,15 +250,28 @@ Page({
 
     fetchSchedule() {
         var that = this
-        return request({ url: api.schedule, showLoading: false, showError: false })
-            .then(function (res) {
+        // 课表和请假一起拉：请假状态要叠在卡片上（「已请假」标记），
+        // 分两次串行拉会让卡片先渲染出来再跳一下，看着像闪。
+        // 请假接口失败不影响课表 —— catch 成空数组，卡片照常显示。
+        var leaves = request({
+            url: api.leave_list, showLoading: false, showError: false
+        }).catch(function () { return { leaves: [] } })
+
+        return Promise.all([
+            request({ url: api.schedule, showLoading: false, showError: false }),
+            leaves
+        ])
+            .then(function (results) {
+                var res = results[0]
+                var leaveRes = results[1] || {}
+
                 var list = (res && res.schedule) || []
                 var groups = buildGroups(list)
                 var suspended = groups.some(function (g) {
                     return g.items.some(function (it) { return it.is_suspended })
                 })
                 that.setData({
-                    groups: groups,
+                    groups: markLeaves(groups, (leaveRes && leaveRes.leaves) || []),
                     loading: false,
                     loadError: false,
                     hasSuspended: suspended
@@ -311,6 +396,43 @@ Page({
             showCancel: false
         })
         track('feedback_action', { type: 'suspended_tip', page_id: 'schedule' })
+    },
+
+    // 点「请假」跳到请假页。
+    //
+    // 日期、时段、孩子都在跳转时带上，不让请假页自己查 ——
+    // 请假页再算一次日期就有第二份真相，两处算法不一致时
+    // 家长看到的日期和实际请假的日期就不是同一天，而且没人看得出来。
+    onLeaveTap(e) {
+        var ds = e.currentTarget.dataset
+        var sessionId = parseInt(ds.sessionId, 10) || 0
+        var studentId = parseInt(ds.studentId, 10) || 0
+        var date = ds.date || ''
+
+        if (!sessionId || !studentId || !date) {
+            wx.showToast({ title: '课程信息不完整，请下拉刷新课表', icon: 'none' })
+            return
+        }
+
+        // 已经请过假了 → 去记录页，那里能撤销。
+        // 再开一次请假表单是没用的：后端幂等会返回原记录，
+        // 家长填了一遍原因却发现什么都没变，会以为系统坏了。
+        if (String(ds.onLeave) === '1') {
+            track('feedback_action', { type: 'leave_view_exist', page_id: 'schedule' })
+            wx.navigateTo({ url: '/pages/leave/records?from=schedule' })
+            return
+        }
+
+        track('feedback_action', { type: 'leave_open', page_id: 'schedule' })
+
+        var url = '/pages/leave/leave' +
+            '?session_id=' + sessionId +
+            '&student_id=' + studentId +
+            '&date=' + encodeURIComponent(date) +
+            '&student_name=' + encodeURIComponent(ds.studentName || '') +
+            '&class_name=' + encodeURIComponent(ds.className || '') +
+            '&time_text=' + encodeURIComponent(ds.timeText || '')
+        wx.navigateTo({ url: url })
     },
 
     onShareAppMessage() {
