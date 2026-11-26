@@ -16,12 +16,13 @@ import { track } from '../../utils/track'
 //          bg-图标底色, path-跳转页面(空=建设中), status-状态, badge-红点数字
 var MENU_LIST = [
     { id: 1, name: '课表',     icon: 'calendar',  color: '#2F6BED', bg: '#EAF1FF', path: '/pages/schedule/schedule?from=menu', badge: 0 },
-    { id: 2, name: '请假',     icon: 'time',      color: '#2BB673', bg: '#E8F8F1', path: '', badge: 0 },
-    { id: 3, name: '作业',     icon: 'edit',      color: '#7B61FF', bg: '#F1EDFF', path: '', badge: 0 },
-    { id: 4, name: '课时查询', icon: 'chart-bar', color: '#FF9A4D', bg: '#FFF3E8', path: '/pages/hours/hours?from=menu', badge: 0 },
-    { id: 5, name: '成绩单',   icon: 'file-1',    color: '#F5544B', bg: '#FEEDEC', path: '', badge: 0 },
-    { id: 6, name: '电子相册', icon: 'image',     color: '#2F6BED', bg: '#EAF1FF', path: '', badge: 0 },
-    { id: 7, name: '积分商城', icon: 'gift',      color: '#FF9A4D', bg: '#FFF3E8', path: '', badge: 0 }
+    { id: 2, name: '上课记录', icon: 'history',   color: '#2BB673', bg: '#E8F8F1', path: '/pages/records/records?from=menu', badge: 0 },
+    { id: 3, name: '请假',     icon: 'time',      color: '#2BB673', bg: '#E8F8F1', path: '', badge: 0 },
+    { id: 4, name: '作业',     icon: 'edit',      color: '#7B61FF', bg: '#F1EDFF', path: '', badge: 0 },
+    { id: 5, name: '课时查询', icon: 'chart-bar', color: '#FF9A4D', bg: '#FFF3E8', path: '/pages/hours/hours?from=menu', badge: 0 },
+    { id: 6, name: '成绩单',   icon: 'file-1',    color: '#F5544B', bg: '#FEEDEC', path: '', badge: 0 },
+    { id: 7, name: '电子相册', icon: 'image',     color: '#2F6BED', bg: '#EAF1FF', path: '', badge: 0 },
+    { id: 8, name: '积分商城', icon: 'gift',      color: '#FF9A4D', bg: '#FFF3E8', path: '', badge: 0 }
 ]
 
 Page({

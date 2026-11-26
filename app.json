@@ -5,7 +5,8 @@
         "pages/activity/activity",
         "pages/login/login",
         "pages/schedule/schedule",
-        "pages/hours/hours"
+        "pages/hours/hours",
+        "pages/records/records"
     ],
     "window": {
         "navigationBarTitleText": "未蓝科技",

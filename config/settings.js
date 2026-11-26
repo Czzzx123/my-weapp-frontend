@@ -46,8 +46,10 @@ module.exports = {
     // 教务（阶段 3，只读，必须登录）
     // schedule：每周固定课表，不含临时调课
     // hours：每个孩子每个班的课时额度与剩余（余额由流水实时汇总）
+    // lesson_records：上课记录，孩子哪天上了哪节课、扣了几课时（只含消课）
     schedule: rootUrl + '/schedule/',
     hours: rootUrl + '/hours/',
+    lesson_records: rootUrl + '/lesson_records/',
 
     // 服务菜单（后端未就绪，前端降级 mock）
     menu: rootUrl + '/menu/'

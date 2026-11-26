@@ -1,0 +1,99 @@
+<!--上课记录：按上课日期分组，一条一次签到-->
+<view class="page">
+
+    <!-- 未登录 -->
+    <view wx:if="{{!logged}}" class="gate card">
+        <t-icon name="calendar" size="88rpx" color="#D5DBE4" />
+        <text class="gate-title">登录后查看上课记录</text>
+        <text class="gate-sub">上课记录含孩子的出勤明细，需要登录才能查看</text>
+        <view class="gate-btn tapable" bindtap="gotoLogin">去登录</view>
+    </view>
+
+    <!-- 加载中 -->
+    <view wx:elif="{{loading}}" class="state card">
+        <text class="state-text">正在加载记录…</text>
+    </view>
+
+    <!-- 加载失败 -->
+    <view wx:elif="{{loadError}}" class="state card">
+        <t-icon name="wifi-off" size="72rpx" color="#D5DBE4" />
+        <text class="state-text">记录加载失败，请检查网络</text>
+        <view class="state-btn tapable" bindtap="retry">重试</view>
+    </view>
+
+    <!-- 一条记录都没有 -->
+    <view wx:elif="{{groups.length === 0}}" class="state card">
+        <t-icon name="calendar" size="72rpx" color="#D5DBE4" />
+        <text class="state-text">还没有上课记录</text>
+        <text class="state-sub">老师签到后，这里会显示每次上课的时间与扣课时</text>
+        <view class="state-btn tapable" bindtap="gotoHours">查看剩余课时</view>
+    </view>
+
+    <block wx:else>
+        <!-- 顶部统计 -->
+        <view class="sum card">
+            <view class="sum-item">
+                <text class="sum-num">{{monthCount}}</text>
+                <text class="sum-label">本月上课</text>
+            </view>
+            <view class="sum-line"></view>
+            <view class="sum-item">
+                <text class="sum-num">{{totalCount}}</text>
+                <text class="sum-label">累计记录</text>
+            </view>
+            <view class="sum-line"></view>
+            <view class="sum-item sum-link tapable" bindtap="gotoHours">
+                <text class="sum-go">剩余课时</text>
+                <t-icon name="chevron-right" size="28rpx" color="#9AA3AF" />
+            </view>
+        </view>
+
+        <!-- 多个孩子才有筛选：一个孩子时切换栏是纯噪音 -->
+        <scroll-view wx:if="{{students.length > 1}}" class="kids" scroll-x enable-flex>
+            <view class="kid {{activeStudentId === '' ? 'kid-on' : ''}}"
+                  data-sid="" bindtap="onStudentTap">全部</view>
+            <view wx:for="{{students}}" wx:key="id"
+                  class="kid {{activeStudentId === item.id ? 'kid-on' : ''}}"
+                  data-sid="{{item.id}}" bindtap="onStudentTap">{{item.name}}</view>
+        </scroll-view>
+
+        <!-- 一天一组 -->
+        <view class="day" wx:for="{{groups}}" wx:for-item="day" wx:key="date">
+            <view class="day-head">
+                <text class="day-label">{{day.day}}</text>
+                <text class="day-sub">{{day.weekday}} · 共 {{day.count}} 节</text>
+            </view>
+
+            <view class="rec card {{item.is_revoked ? 'rec-revoked' : ''}}"
+                  wx:for="{{day.items}}"
+                  wx:key="id"
+                  data-item="{{item}}"
+                  bindtap="onItemTap">
+
+                <view class="rec-left">
+                    <!-- 时间：家长核对「那节课是不是这个点」靠它 -->
+                    <text class="rec-time">{{item.start_time}}</text>
+                    <text class="rec-delta">-{{item.abs_delta}}</text>
+                </view>
+
+                <view class="rec-mid">
+                    <view class="rec-titles">
+                        <text class="rec-class">{{item.class_name}}</text>
+                        <!-- 只有多孩子时才标孩子名，单孩子时每行都写名字是重复 -->
+                        <text wx:if="{{students.length > 1}}" class="rec-student">{{item.student_name}}</text>
+                    </view>
+                    <text class="rec-course">{{item.course_name}}</text>
+                </view>
+
+                <view class="rec-right">
+                    <view wx:if="{{item.is_revoked}}" class="tag tag-revoked">已撤销</view>
+                    <t-icon wx:else name="chevron-right" size="28rpx" color="#D5DBE4" />
+                </view>
+            </view>
+        </view>
+
+        <view class="foot-tip">记录由老师签到后生成，有疑问请直接联系老师核对</view>
+    </block>
+
+    <view class="safe-bottom"></view>
+</view>

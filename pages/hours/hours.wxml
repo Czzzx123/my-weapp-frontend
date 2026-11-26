@@ -93,6 +93,13 @@
                     <text>课时不足 20%，建议尽快续费</text>
                 </view>
 
+                <!-- 入口：家长看到「已用 5」，下一个问题必然是「哪 5 次」。
+                     带 student_id 过去，进去只看这个孩子的记录。 -->
+                <view class="hour-more tapable" data-sid="{{kid.student_id}}" bindtap="gotoRecords">
+                    <text>查看上课记录</text>
+                    <t-icon name="chevron-right" size="26rpx" color="#9AA3AF" />
+                </view>
+
             </view>
         </view>
 

@@ -1,0 +1,277 @@
+/* 上课记录页 */
+
+page {
+    background-color: var(--wl-bg);
+}
+
+.page {
+    padding: var(--wl-sp-3);
+    padding-bottom: calc(var(--wl-sp-4) + env(safe-area-inset-bottom));
+    box-sizing: border-box;
+}
+
+/* ============ 门禁 / 空态 / 错误态 ============ */
+.gate,
+.state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 96rpx var(--wl-sp-4);
+    text-align: center;
+}
+
+.gate-title {
+    margin-top: var(--wl-sp-3);
+    font-size: var(--wl-fs-h2);
+    font-weight: 600;
+    color: var(--wl-text-1);
+}
+
+.gate-sub {
+    margin-top: var(--wl-sp-1);
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-3);
+    line-height: 1.5;
+}
+
+.gate-btn {
+    margin-top: var(--wl-sp-4);
+    padding: 0 var(--wl-sp-8);
+    height: 72rpx;
+    line-height: 72rpx;
+    border-radius: var(--wl-r-pill);
+    background: var(--wl-brand-gradient);
+    color: #fff;
+    font-size: var(--wl-fs-body);
+    font-weight: 500;
+    box-shadow: var(--wl-shadow-float);
+}
+
+.state-text {
+    margin-top: var(--wl-sp-3);
+    font-size: var(--wl-fs-body);
+    color: var(--wl-text-2);
+}
+
+.state-sub {
+    margin-top: var(--wl-sp-1);
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-3);
+    line-height: 1.5;
+}
+
+.state-btn {
+    margin-top: var(--wl-sp-4);
+    padding: 0 var(--wl-sp-6);
+    height: 68rpx;
+    line-height: 68rpx;
+    border-radius: var(--wl-r-pill);
+    border: 1rpx solid var(--wl-brand);
+    color: var(--wl-brand);
+    font-size: var(--wl-fs-sub);
+}
+
+/* ============ 顶部统计 ============ */
+.sum {
+    display: flex;
+    align-items: center;
+    padding: var(--wl-sp-3);
+    margin-bottom: var(--wl-sp-3);
+}
+
+.sum-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+}
+
+.sum-num {
+    font-size: 44rpx;
+    font-weight: 700;
+    color: var(--wl-brand);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+.sum-label {
+    margin-top: 6rpx;
+    font-size: var(--wl-fs-mini);
+    color: var(--wl-text-3);
+}
+
+.sum-line {
+    width: 1rpx;
+    height: 48rpx;
+    background-color: var(--wl-divider);
+    flex-shrink: 0;
+}
+
+/* 「剩余课时」这一格是跳转入口，不是数字，所以配一套不同的排版 */
+.sum-link {
+    flex-direction: row;
+    justify-content: center;
+    gap: 4rpx;
+}
+
+.sum-go {
+    font-size: var(--wl-fs-sub);
+    color: var(--wl-text-2);
+}
+
+/* ============ 孩子筛选 ============ */
+.kids {
+    display: flex;
+    white-space: nowrap;
+    margin-bottom: var(--wl-sp-3);
+}
+
+.kid {
+    display: inline-block;
+    padding: 0 var(--wl-sp-3);
+    height: 60rpx;
+    line-height: 60rpx;
+    margin-right: var(--wl-sp-2);
+    border-radius: var(--wl-r-pill);
+    background-color: var(--wl-surface);
+    border: 1rpx solid var(--wl-border);
+    font-size: var(--wl-fs-sub);
+    color: var(--wl-text-2);
+    flex-shrink: 0;
+}
+
+.kid-on {
+    background-color: var(--wl-brand-bg);
+    border-color: var(--wl-brand);
+    color: var(--wl-brand);
+    font-weight: 500;
+}
+
+/* ============ 一天一组 ============ */
+.day {
+    margin-bottom: var(--wl-sp-2);
+}
+
+.day-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--wl-sp-2);
+    padding: 0 4rpx var(--wl-sp-2);
+}
+
+.day-label {
+    font-size: var(--wl-fs-h2);
+    font-weight: 600;
+    color: var(--wl-text-1);
+}
+
+.day-sub {
+    font-size: var(--wl-fs-mini);
+    color: var(--wl-text-3);
+}
+
+/* ============ 一条记录 ============ */
+.rec {
+    display: flex;
+    align-items: center;
+    gap: var(--wl-sp-3);
+    padding: var(--wl-sp-3);
+}
+
+.rec-revoked {
+    background-color: #FAFBFC;
+    opacity: 0.7;
+}
+
+.rec-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 96rpx;
+}
+
+.rec-time {
+    font-size: var(--wl-fs-sub);
+    font-weight: 600;
+    color: var(--wl-text-1);
+    font-variant-numeric: tabular-nums;
+}
+
+/* 扣课时用灰色小标签，不用红色 —— 正常上课不是异常，
+   天天红一片会让真正的异常失去警示力 */
+.rec-delta {
+    margin-top: 6rpx;
+    padding: 0 10rpx;
+    border-radius: var(--wl-r-s);
+    background-color: var(--wl-divider);
+    font-size: var(--wl-fs-mini);
+    color: var(--wl-text-2);
+    font-variant-numeric: tabular-nums;
+}
+
+.rec-mid {
+    flex: 1;
+    min-width: 0;
+}
+
+.rec-titles {
+    display: flex;
+    align-items: center;
+    gap: var(--wl-sp-1);
+}
+
+.rec-class {
+    font-size: var(--wl-fs-body);
+    font-weight: 600;
+    color: var(--wl-text-1);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rec-student {
+    flex-shrink: 0;
+    padding: 0 10rpx;
+    border-radius: var(--wl-r-s);
+    background-color: var(--wl-brand-bg);
+    font-size: var(--wl-fs-mini);
+    color: var(--wl-brand);
+}
+
+.rec-course {
+    display: block;
+    margin-top: 4rpx;
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rec-right {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.tag {
+    padding: 2rpx 12rpx;
+    border-radius: var(--wl-r-s);
+    font-size: var(--wl-fs-mini);
+}
+
+.tag-revoked {
+    background-color: #F0F2F5;
+    color: var(--wl-text-3);
+}
+
+/* ============ 底部说明 ============ */
+.foot-tip {
+    padding: var(--wl-sp-2) var(--wl-sp-3) var(--wl-sp-4);
+    text-align: center;
+    font-size: var(--wl-fs-mini);
+    color: var(--wl-text-3);
+    line-height: 1.6;
+}

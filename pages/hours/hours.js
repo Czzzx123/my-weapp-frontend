@@ -189,6 +189,15 @@ Page({
         track('feedback_action', { type: 'hours_low', page_id: 'hours' })
     },
 
+    // 去上课记录：带 student_id，进去只看这个孩子的明细
+    gotoRecords(e) {
+        var sid = e.currentTarget.dataset.sid
+        track('menu_click', { item_id: 0, name: '上课记录', has_path: true, status: 'online' })
+        wx.navigateTo({
+            url: '/pages/records/records?from=hours' + (sid ? '&student_id=' + sid : '')
+        })
+    },
+
     onShareAppMessage() {
         return {
             title: '未蓝科技 · 孩子的课时一目了然',
