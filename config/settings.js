@@ -7,7 +7,7 @@ var env = 'dev'
 //   - 真机调试 / 手机预览：必须用电脑的**局域网 IP**，因为手机上的 127.0.0.1 指向手机自己
 // 局域网 IP 会随 WiFi 变化，换网络后要重新查（ipconfig）并改这里。
 // 后端也要同时满足两条：runserver 监听 0.0.0.0，且 .env 的 DJANGO_ALLOWED_HOSTS 含该 IP。
-var LAN_IP = '10.1.67.108'
+var LAN_IP = '10.1.98.30'
 
 var CONFIG = {
     dev: {
@@ -42,6 +42,12 @@ module.exports = {
     bind_mobile: rootUrl + '/user/bind_mobile/',
     update_profile: rootUrl + '/user/update_profile/',
     logout: rootUrl + '/user/logout/',
+
+    // 教务（阶段 3，只读，必须登录）
+    // schedule：每周固定课表，不含临时调课
+    // hours：每个孩子每个班的课时额度与剩余（余额由流水实时汇总）
+    schedule: rootUrl + '/schedule/',
+    hours: rootUrl + '/hours/',
 
     // 服务菜单（后端未就绪，前端降级 mock）
     menu: rootUrl + '/menu/'

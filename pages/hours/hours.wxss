@@ -1,0 +1,284 @@
+/* 课时页 */
+
+page {
+    background-color: var(--wl-bg);
+}
+
+.page {
+    padding: var(--wl-sp-3);
+    padding-bottom: calc(var(--wl-sp-4) + env(safe-area-inset-bottom));
+    box-sizing: border-box;
+}
+
+/* ============ 门禁 / 空态 / 错误态 ============ */
+.gate,
+.state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 96rpx var(--wl-sp-4);
+    text-align: center;
+}
+
+.gate-title {
+    margin-top: var(--wl-sp-3);
+    font-size: var(--wl-fs-h2);
+    font-weight: 600;
+    color: var(--wl-text-1);
+}
+
+.gate-sub {
+    margin-top: var(--wl-sp-1);
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-3);
+    line-height: 1.5;
+}
+
+.gate-btn {
+    margin-top: var(--wl-sp-4);
+    padding: 0 var(--wl-sp-8);
+    height: 72rpx;
+    line-height: 72rpx;
+    border-radius: var(--wl-r-pill);
+    background: var(--wl-brand-gradient);
+    color: #fff;
+    font-size: var(--wl-fs-body);
+    font-weight: 500;
+    box-shadow: var(--wl-shadow-float);
+}
+
+.state-text {
+    margin-top: var(--wl-sp-3);
+    font-size: var(--wl-fs-body);
+    color: var(--wl-text-2);
+}
+
+.state-sub {
+    margin-top: var(--wl-sp-1);
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-3);
+}
+
+.state-btn {
+    margin-top: var(--wl-sp-4);
+    padding: 0 var(--wl-sp-6);
+    height: 68rpx;
+    line-height: 68rpx;
+    border-radius: var(--wl-r-pill);
+    border: 1rpx solid var(--wl-brand);
+    color: var(--wl-brand);
+    font-size: var(--wl-fs-sub);
+}
+
+/* ============ 课时紧张提示条 ============ */
+.warn-tip {
+    display: flex;
+    align-items: center;
+    gap: 10rpx;
+    padding: var(--wl-sp-2) var(--wl-sp-3);
+    margin-bottom: var(--wl-sp-3);
+    border-radius: var(--wl-r-s);
+    background-color: #FFF8EC;
+    font-size: var(--wl-fs-cap);
+    color: #B5791A;
+    line-height: 1.5;
+}
+
+/* ============ 一个孩子一组 ============ */
+.student-block {
+    margin-bottom: var(--wl-sp-2);
+}
+
+.student-head {
+    display: flex;
+    align-items: center;
+    gap: var(--wl-sp-2);
+    padding: 0 4rpx var(--wl-sp-2);
+}
+
+.student-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52rpx;
+    height: 52rpx;
+    border-radius: 50%;
+    background: var(--wl-brand-gradient);
+    color: #fff;
+    font-size: var(--wl-fs-sub);
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.student-name {
+    font-size: var(--wl-fs-h2);
+    font-weight: 600;
+    color: var(--wl-text-1);
+}
+
+.student-sum {
+    margin-left: auto;
+    font-size: var(--wl-fs-mini);
+    color: var(--wl-text-3);
+}
+
+/* ============ 课时卡 ============ */
+.hour-card {
+    position: relative;
+}
+
+.hour-card-warn {
+    /* 左侧一条红边而不是整卡变红：整卡变红像「出错了」，
+       而课时不足是提示不是错误 */
+    border-left: 6rpx solid var(--wl-error);
+    padding-left: calc(var(--wl-sp-3) - 6rpx);
+}
+
+.hour-card-inactive {
+    background-color: #FAFBFC;
+    opacity: 0.72;
+}
+
+.hour-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--wl-sp-2);
+}
+
+.hour-titles {
+    flex: 1;
+    min-width: 0;
+}
+
+.hour-class {
+    display: block;
+    font-size: var(--wl-fs-body);
+    font-weight: 600;
+    color: var(--wl-text-1);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hour-course {
+    display: block;
+    margin-top: 4rpx;
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tag {
+    flex-shrink: 0;
+    padding: 2rpx 12rpx;
+    border-radius: var(--wl-r-s);
+    font-size: var(--wl-fs-mini);
+}
+
+.tag-inactive {
+    background-color: #F0F2F5;
+    color: var(--wl-text-3);
+}
+
+/* 数字区：剩余是主角 */
+.hour-nums {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8rpx;
+    margin-top: var(--wl-sp-3);
+}
+
+.num-remain {
+    display: flex;
+    align-items: baseline;
+    gap: 4rpx;
+}
+
+.num-big {
+    font-size: 64rpx;
+    font-weight: 700;
+    color: var(--wl-brand);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.num-big-warn {
+    color: var(--wl-error);
+}
+
+.num-unit {
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-2);
+}
+
+.num-label {
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-3);
+    /* 和单位一样给个微小基线偏移，视觉上与「课时」同层，
+       不与 64rpx 的大数字抢基线 */
+    align-self: baseline;
+    padding-bottom: 6rpx;
+}
+
+.num-total {
+    margin-left: auto;
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-3);
+    font-variant-numeric: tabular-nums;
+}
+
+/* 进度条 */
+.bar-track {
+    height: 12rpx;
+    margin-top: var(--wl-sp-3);
+    border-radius: var(--wl-r-pill);
+    background-color: var(--wl-divider);
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: var(--wl-r-pill);
+    background: var(--wl-brand-gradient);
+    /* 宽度变化做个过渡，下拉刷新时不会「跳」一下 */
+    transition: width 0.35s ease;
+}
+
+.bar-fill-warn {
+    background: linear-gradient(135deg, #FF9A85 0%, #F5544B 100%);
+}
+
+/* 提示行 */
+.hour-tip {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+    margin-top: var(--wl-sp-2);
+    padding: 10rpx 16rpx;
+    border-radius: var(--wl-r-s);
+    font-size: var(--wl-fs-cap);
+    line-height: 1.5;
+}
+
+.tip-danger {
+    background-color: #FEEDEC;
+    color: #C43A32;
+}
+
+.tip-warn {
+    background-color: var(--wl-accent-bg);
+    color: #C4701F;
+}
+
+/* ============ 底部说明 ============ */
+.foot-tip {
+    padding: var(--wl-sp-2) var(--wl-sp-3) var(--wl-sp-4);
+    text-align: center;
+    font-size: var(--wl-fs-mini);
+    color: var(--wl-text-3);
+    line-height: 1.6;
+}

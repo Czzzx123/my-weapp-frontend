@@ -1,0 +1,103 @@
+<!--课表：按天分组的纵向列表-->
+<view class="page">
+
+    <!-- 未登录：先引导登录，不要显示空课表 -->
+    <view wx:if="{{!logged}}" class="gate card">
+        <t-icon name="calendar" size="88rpx" color="#D5DBE4" />
+        <text class="gate-title">登录后查看孩子课表</text>
+        <text class="gate-sub">课表含孩子姓名与班级，需要登录才能查看</text>
+        <view class="gate-btn tapable" bindtap="gotoLogin">去登录</view>
+    </view>
+
+    <!-- 加载中 -->
+    <view wx:elif="{{loading}}" class="state card">
+        <text class="state-text">正在加载课表…</text>
+    </view>
+
+    <!-- 加载失败：与「没课」分开表达 -->
+    <view wx:elif="{{loadError}}" class="state card">
+        <t-icon name="wifi-off" size="72rpx" color="#D5DBE4" />
+        <text class="state-text">课表加载失败，请检查网络</text>
+        <view class="state-btn tapable" bindtap="retry">重试</view>
+    </view>
+
+    <!-- 真的没有课 -->
+    <view wx:elif="{{groups.length === 0}}" class="state card">
+        <t-icon name="calendar" size="72rpx" color="#D5DBE4" />
+        <text class="state-text">还没有安排课程</text>
+        <text class="state-sub">报名后课表会自动出现在这里</text>
+    </view>
+
+    <block wx:else>
+        <!-- 停课提示：只标灰不解释，家长会以为页面坏了 -->
+        <view wx:if="{{hasSuspended}}" class="suspend-tip">
+            <t-icon name="info-circle" size="30rpx" color="#F5A623" />
+            <text>灰色卡片表示该时段已停课，请勿按此时间前往</text>
+        </view>
+
+        <!-- 每天一组：日期头 + 卡列表 -->
+        <view class="day-group" wx:for="{{groups}}" wx:for-item="day" wx:key="weekday">
+            <view class="day-head">
+                <view class="day-date {{day.is_today ? 'day-date-today' : ''}}">
+                    <text class="day-date-num">{{day.date_text}}</text>
+                    <text class="day-date-week">{{day.weekday_label}}</text>
+                </view>
+                <text class="day-label {{day.is_today ? 'day-label-today' : ''}}">{{day.day_label}}</text>
+                <view class="day-line"></view>
+                <text class="day-count">{{day.count}} 节</text>
+            </view>
+
+            <view class="lesson-card card {{item.is_suspended ? 'lesson-suspended' : ''}}"
+                  wx:for="{{day.items}}"
+                  wx:key="session_id"
+                  data-item="{{item}}"
+                  bindtap="onLessonTap"
+                  hover-class="{{item.is_suspended ? 'tapable-hover' : 'none'}}">
+
+                <!-- 左侧时间轴 -->
+                <view class="lesson-time">
+                    <text class="time-start">{{item.start_time}}</text>
+                    <view class="time-line"></view>
+                    <text class="time-end">{{item.end_time}}</text>
+                </view>
+
+                <!-- 右侧内容 -->
+                <view class="lesson-body">
+                    <view class="lesson-top">
+                        <text class="lesson-class">{{item.class_name}}</text>
+                        <view wx:if="{{item.is_suspended}}" class="tag tag-suspended">{{item.status_label || '停课'}}</view>
+                    </view>
+
+                    <text class="lesson-course">{{item.course_name}}</text>
+
+                    <view class="lesson-meta">
+                        <view class="meta-item">
+                            <t-icon name="user" size="24rpx" color="#9AA3AF" />
+                            <text>{{item.teacher || '待定'}}</text>
+                        </view>
+                        <view wx:if="{{item.room}}" class="meta-item">
+                            <t-icon name="location" size="24rpx" color="#9AA3AF" />
+                            <text>{{item.room}}</text>
+                        </view>
+                    </view>
+
+                    <!-- 代课教师单独一行：家长最关心的就是这个 -->
+                    <view wx:if="{{item.substitute_teacher}}" class="substitute">
+                        <t-icon name="swap" size="24rpx" color="#FF9A4D" />
+                        <text>本节课由 {{item.substitute_teacher}} 老师代课</text>
+                    </view>
+
+                    <!-- 多个孩子上同一个班时，标明是谁的课 -->
+                    <view wx:if="{{item.is_multi}}" class="student-row">
+                        <t-icon name="usergroup" size="24rpx" color="#9AA3AF" />
+                        <text>{{item.student_names}}</text>
+                    </view>
+                </view>
+            </view>
+        </view>
+
+        <view class="foot-tip">课表为每周固定安排，临时调课以老师通知为准</view>
+    </block>
+
+    <view class="safe-bottom"></view>
+</view>

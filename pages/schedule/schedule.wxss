@@ -1,0 +1,303 @@
+/* 课表页 */
+
+page {
+    background-color: var(--wl-bg);
+}
+
+.page {
+    padding: var(--wl-sp-3);
+    padding-bottom: calc(var(--wl-sp-4) + env(safe-area-inset-bottom));
+    box-sizing: border-box;
+}
+
+/* ============ 门禁 / 空态 / 错误态（三态分开表达） ============ */
+.gate,
+.state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 96rpx var(--wl-sp-4);
+    text-align: center;
+}
+
+.gate-title {
+    margin-top: var(--wl-sp-3);
+    font-size: var(--wl-fs-h2);
+    font-weight: 600;
+    color: var(--wl-text-1);
+}
+
+.gate-sub {
+    margin-top: var(--wl-sp-1);
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-3);
+    line-height: 1.5;
+}
+
+.gate-btn {
+    margin-top: var(--wl-sp-4);
+    padding: 0 var(--wl-sp-8);
+    height: 72rpx;
+    line-height: 72rpx;
+    border-radius: var(--wl-r-pill);
+    background: var(--wl-brand-gradient);
+    color: #fff;
+    font-size: var(--wl-fs-body);
+    font-weight: 500;
+    box-shadow: var(--wl-shadow-float);
+}
+
+.state-text {
+    margin-top: var(--wl-sp-3);
+    font-size: var(--wl-fs-body);
+    color: var(--wl-text-2);
+}
+
+.state-sub {
+    margin-top: var(--wl-sp-1);
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-3);
+}
+
+.state-btn {
+    margin-top: var(--wl-sp-4);
+    padding: 0 var(--wl-sp-6);
+    height: 68rpx;
+    line-height: 68rpx;
+    border-radius: var(--wl-r-pill);
+    border: 1rpx solid var(--wl-brand);
+    color: var(--wl-brand);
+    font-size: var(--wl-fs-sub);
+}
+
+/* ============ 停课提示条 ============ */
+.suspend-tip {
+    display: flex;
+    align-items: center;
+    gap: 10rpx;
+    padding: var(--wl-sp-2) var(--wl-sp-3);
+    margin-bottom: var(--wl-sp-3);
+    border-radius: var(--wl-r-s);
+    background-color: #FFF8EC;
+    font-size: var(--wl-fs-cap);
+    color: #B5791A;
+    line-height: 1.5;
+}
+
+/* ============ 一天一组 ============ */
+.day-group {
+    margin-bottom: var(--wl-sp-4);
+}
+
+.day-head {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--wl-sp-2);
+    padding: 0 4rpx;
+}
+
+/* 日期块：左边日期大字，右边周几 */
+.day-date {
+    display: flex;
+    align-items: baseline;
+    gap: 8rpx;
+}
+
+.day-date-num {
+    font-size: var(--wl-fs-h2);
+    font-weight: 700;
+    color: var(--wl-text-1);
+    letter-spacing: 0.5rpx;
+}
+
+.day-date-week {
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-3);
+}
+
+.day-date-today .day-date-num {
+    color: var(--wl-brand);
+}
+
+.day-date-today .day-date-week {
+    color: var(--wl-brand);
+}
+
+/* 「今天」用胶囊高亮，其余是普通灰字 */
+.day-label {
+    margin-left: var(--wl-sp-2);
+    padding: 2rpx 14rpx;
+    border-radius: var(--wl-r-pill);
+    font-size: var(--wl-fs-mini);
+    color: var(--wl-text-3);
+    background-color: transparent;
+}
+
+.day-label-today {
+    color: #fff;
+    background: var(--wl-brand-gradient);
+    font-weight: 500;
+}
+
+.day-line {
+    flex: 1;
+    height: 1rpx;
+    margin: 0 var(--wl-sp-2);
+    background-color: var(--wl-divider);
+}
+
+.day-count {
+    font-size: var(--wl-fs-mini);
+    color: var(--wl-text-3);
+}
+
+/* ============ 课卡 ============ */
+.lesson-card {
+    display: flex;
+    padding: 0;
+    overflow: hidden;
+}
+
+.lesson-suspended {
+    background-color: #FAFBFC;
+    /* 停课不是错误，是状态。用降饱和而不是划掉，划掉像「已完成」 */
+    opacity: 0.62;
+}
+
+/* 左侧时间轴：开始时间 / 竖线 / 结束时间 */
+.lesson-time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 132rpx;
+    flex-shrink: 0;
+    padding: var(--wl-sp-3) 0;
+    background-color: var(--wl-brand-bg);
+}
+
+.lesson-suspended .lesson-time {
+    background-color: #F0F2F5;
+}
+
+.time-start {
+    font-size: var(--wl-fs-body);
+    font-weight: 700;
+    color: var(--wl-brand);
+    font-variant-numeric: tabular-nums;
+}
+
+.time-line {
+    width: 2rpx;
+    height: 28rpx;
+    margin: 6rpx 0;
+    background-color: rgba(47, 107, 237, 0.28);
+}
+
+.time-end {
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-2);
+    font-variant-numeric: tabular-nums;
+}
+
+.lesson-suspended .time-start,
+.lesson-suspended .time-end {
+    color: var(--wl-text-3);
+}
+
+.lesson-suspended .time-line {
+    background-color: var(--wl-border);
+}
+
+/* 右侧内容区 */
+.lesson-body {
+    flex: 1;
+    min-width: 0;
+    padding: var(--wl-sp-3);
+}
+
+.lesson-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--wl-sp-2);
+}
+
+.lesson-class {
+    flex: 1;
+    min-width: 0;
+    font-size: var(--wl-fs-body);
+    font-weight: 600;
+    color: var(--wl-text-1);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lesson-course {
+    display: block;
+    margin-top: 4rpx;
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tag {
+    flex-shrink: 0;
+    padding: 2rpx 12rpx;
+    border-radius: var(--wl-r-s);
+    font-size: var(--wl-fs-mini);
+}
+
+.tag-suspended {
+    background-color: #F0F2F5;
+    color: var(--wl-text-3);
+}
+
+.lesson-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--wl-sp-2);
+    margin-top: var(--wl-sp-2);
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6rpx;
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-3);
+}
+
+.substitute {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+    margin-top: var(--wl-sp-2);
+    padding: 8rpx 14rpx;
+    border-radius: var(--wl-r-s);
+    background-color: var(--wl-accent-bg);
+    font-size: var(--wl-fs-cap);
+    color: #C4701F;
+}
+
+.student-row {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+    margin-top: 10rpx;
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-3);
+}
+
+/* ============ 底部说明 ============ */
+.foot-tip {
+    padding: var(--wl-sp-2) var(--wl-sp-3) var(--wl-sp-4);
+    text-align: center;
+    font-size: var(--wl-fs-mini);
+    color: var(--wl-text-3);
+    line-height: 1.6;
+}

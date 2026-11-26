@@ -3,7 +3,9 @@
         "pages/index/index",
         "pages/my/my",
         "pages/activity/activity",
-        "pages/login/login"
+        "pages/login/login",
+        "pages/schedule/schedule",
+        "pages/hours/hours"
     ],
     "window": {
         "navigationBarTitleText": "未蓝科技",

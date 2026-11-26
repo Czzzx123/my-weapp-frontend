@@ -1,0 +1,103 @@
+<!--课时：每个孩子一张卡，班内进度条-->
+<view class="page">
+
+    <!-- 未登录 -->
+    <view wx:if="{{!logged}}" class="gate card">
+        <t-icon name="chart-bar" size="88rpx" color="#D5DBE4" />
+        <text class="gate-title">登录后查看课时</text>
+        <text class="gate-sub">课时含孩子的报名与消费记录，需要登录才能查看</text>
+        <view class="gate-btn tapable" bindtap="gotoLogin">去登录</view>
+    </view>
+
+    <!-- 加载中 -->
+    <view wx:elif="{{loading}}" class="state card">
+        <text class="state-text">正在加载课时…</text>
+    </view>
+
+    <!-- 加载失败 -->
+    <view wx:elif="{{loadError}}" class="state card">
+        <t-icon name="wifi-off" size="72rpx" color="#D5DBE4" />
+        <text class="state-text">课时加载失败，请检查网络</text>
+        <view class="state-btn tapable" bindtap="retry">重试</view>
+    </view>
+
+    <!-- 没有报名 -->
+    <view wx:elif="{{groups.length === 0}}" class="state card">
+        <t-icon name="chart-bar" size="72rpx" color="#D5DBE4" />
+        <text class="state-text">还没有报名记录</text>
+        <text class="state-sub">报名后课时额度会出现在这里</text>
+    </view>
+
+    <block wx:else>
+        <!-- 课时紧张提示 -->
+        <view wx:if="{{hasWarn}}" class="warn-tip">
+            <t-icon name="error-circle" size="30rpx" color="#F5A454" />
+            <text>有班级课时不足，建议尽快联系老师续费</text>
+        </view>
+
+        <!-- 一个孩子一组 -->
+        <view class="student-block" wx:for="{{groups}}" wx:for-item="kid" wx:key="student_id">
+
+            <!-- 分组头：只有一个孩子时不显示，省一层噪音 -->
+            <view wx:if="{{!singleChild}}" class="student-head">
+                <view class="student-avatar">
+                    <text>{{kid.initial}}</text>
+                </view>
+                <text class="student-name">{{kid.student_name}}</text>
+                <text class="student-sum">在读 {{kid.class_count}} 个班 · 剩余 {{kid.remain}}</text>
+            </view>
+
+            <!-- 每个班一张卡 -->
+            <view class="hour-card card {{item.is_warn ? 'hour-card-warn' : ''}} {{item.is_active ? '' : 'hour-card-inactive'}}"
+                  wx:for="{{kid.classes}}"
+                  wx:key="enrollment_id">
+
+                <view class="hour-top">
+                    <view class="hour-titles">
+                        <text class="hour-class">{{item.class_name}}</text>
+                        <text class="hour-course">{{item.course_name}}</text>
+                    </view>
+                    <!-- 已结课/已退费要标出来，否则家长会拿旧额度当有效 -->
+                    <view wx:if="{{!item.is_active}}" class="tag tag-inactive">{{item.status_label}}</view>
+                </view>
+
+                <!-- 数字区：剩余是主角。
+                     语序必须是「剩余 16 课时」——反过来写成「16 课时 剩余」，
+                     中文读起来不通，家长会愣一下。 -->
+                <view class="hour-nums">
+                  <text class="num-label">剩余</text>
+                  <view class="num-remain">
+                    <text class="num-big {{item.is_warn ? 'num-big-warn' : ''}}">{{item.remain}}</text>
+                    <text class="num-unit">{{item.unit_label}}</text>
+                  </view>
+                  <text class="num-total">共 {{item.total}} · 已用 {{item.used}}</text>
+                </view>
+
+                <!-- 进度条：宽度直接用后端算好的百分比，前端不参与计算 -->
+                <view class="bar-track">
+                    <view class="bar-fill {{item.is_warn ? 'bar-fill-warn' : ''}}"
+                          style="width: {{item.remain_percent}}%;"></view>
+                </view>
+
+                <!-- 提示行 -->
+                <view wx:if="{{item.is_over}}" class="hour-tip tip-danger" data-item="{{item}}" bindtap="onWarnTap">
+                    <t-icon name="error-circle" size="26rpx" color="#F5544B" />
+                    <text>已超用 {{item.over_count}} {{item.unit_label}}，请尽快联系老师核对</text>
+                </view>
+                <view wx:elif="{{item.is_empty}}" class="hour-tip tip-danger" data-item="{{item}}" bindtap="onWarnTap">
+                    <t-icon name="error-circle" size="26rpx" color="#F5544B" />
+                    <text>课时已用完，续费后才能继续上课</text>
+                </view>
+                <view wx:elif="{{item.is_warn}}" class="hour-tip tip-warn" data-item="{{item}}" bindtap="onWarnTap">
+                    <t-icon name="info-circle" size="26rpx" color="#FF9A4D" />
+                    <text>课时不足 20%，建议尽快续费</text>
+                </view>
+
+            </view>
+        </view>
+
+        <view class="foot-tip">课时按班独立计算，不同班级之间不通用</view>
+    </block>
+
+    <view class="safe-bottom"></view>
+</view>
