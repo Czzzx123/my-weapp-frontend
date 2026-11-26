@@ -29,6 +29,18 @@
     </view>
 
     <block wx:else>
+        <!-- 上课提醒授权：只在模板配好后才出现。
+             文案必须说清「一次授权收一条」—— 一次性订阅不是开关，
+             说成「开启提醒」会让家长以为以后都能收到。 -->
+        <view wx:if="{{notifyEnabled && notifyState !== 'accept'}}" class="notify-bar tapable" bindtap="onNotifyTap">
+            <t-icon name="notification" size="34rpx" color="#2F6BED" />
+            <view class="notify-text">
+                <text class="notify-title">开启上课签到提醒</text>
+                <text class="notify-sub">孩子签到成功后微信通知你，一次授权可收 1 条</text>
+            </view>
+            <text class="notify-btn">开启</text>
+        </view>
+
         <!-- 停课提示：只标灰不解释，家长会以为页面坏了 -->
         <view wx:if="{{hasSuspended}}" class="suspend-tip">
             <t-icon name="info-circle" size="30rpx" color="#F5A623" />

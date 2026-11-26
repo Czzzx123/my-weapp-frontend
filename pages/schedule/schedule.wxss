@@ -84,6 +84,51 @@ page {
     line-height: 1.5;
 }
 
+/* 上课提醒授权条。
+   用品牌蓝底而不是橙色警示色 —— 这是「可以开启的功能」，
+   不是「出了问题」，配色不该让家长紧张。 */
+.notify-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--wl-sp-2);
+    padding: var(--wl-sp-3);
+    margin-bottom: var(--wl-sp-3);
+    border-radius: var(--wl-r-m);
+    background-color: var(--wl-brand-bg);
+}
+
+.notify-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.notify-title {
+    display: block;
+    font-size: var(--wl-fs-sub);
+    font-weight: 600;
+    color: var(--wl-text-1);
+}
+
+.notify-sub {
+    display: block;
+    margin-top: 4rpx;
+    font-size: var(--wl-fs-mini);
+    color: var(--wl-text-2);
+    line-height: 1.4;
+}
+
+.notify-btn {
+    flex-shrink: 0;
+    padding: 0 var(--wl-sp-3);
+    height: 56rpx;
+    line-height: 56rpx;
+    border-radius: var(--wl-r-pill);
+    background: var(--wl-brand-gradient);
+    color: #fff;
+    font-size: var(--wl-fs-cap);
+    font-weight: 500;
+}
+
 /* ============ 一天一组 ============ */
 .day-group {
     margin-bottom: var(--wl-sp-4);

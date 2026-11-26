@@ -50,6 +50,8 @@ module.exports = {
     schedule: rootUrl + '/schedule/',
     hours: rootUrl + '/hours/',
     lesson_records: rootUrl + '/lesson_records/',
+    // notify_config：订阅消息模板 id 下发（匿名可读，模板没配时 enabled=false）
+    notify_config: rootUrl + '/notify_config/',
 
     // 服务菜单（后端未就绪，前端降级 mock）
     menu: rootUrl + '/menu/'

@@ -6,6 +6,7 @@
 import api from '../../config/settings'
 import request from '../../utils/request'
 import { track } from '../../utils/track'
+import subscribe from '../../utils/subscribe'
 
 var WEEK = ['', '周一', '周二', '周三', '周四', '周五', '周六', '周日']
 
@@ -140,7 +141,13 @@ Page({
         // 混在一起会让家长以为孩子被退班了
         loadError: false,
         // 有无停课时段，用于顶部提示
-        hasSuspended: false
+        hasSuspended: false,
+        // 订阅消息：模板 id 与是否可授权
+        notifyTmplId: '',
+        notifyEnabled: false,
+        // 家长上次的选择，只用来决定文案。accept 之后额度可能已用掉，
+        // 所以不能理解成「已开启」。
+        notifyState: ''
     },
 
     onLoad() {
@@ -153,6 +160,7 @@ Page({
         this.setData({ logged: logged })
         if (logged) {
             this.fetchSchedule()
+            this.loadNotifyConfig()
         } else {
             this.setData({ loading: false, groups: [] })
         }
@@ -198,6 +206,63 @@ Page({
 
     gotoLogin() {
         wx.navigateTo({ url: '/pages/login/login?from=schedule' })
+    },
+
+    // 取订阅消息模板 id。
+    // 模板 id 从后端下发，不写死在前端 —— 换模板只是改环境变量，不用发版。
+    loadNotifyConfig() {
+        var that = this
+        return request({ url: api.notify_config, showLoading: false, showError: false })
+            .then(function (res) {
+                that.setData({
+                    notifyTmplId: (res && res.template_id) || '',
+                    notifyEnabled: !!(res && res.enabled),
+                    notifyState: subscribe.getLocalState()
+                })
+            })
+            .catch(function () {
+                // 拿不到配置就不显示按钮。失败静默处理 ——
+                // 「提醒」是附加功能，不该在课表页弹错误打断家长看课表。
+                that.setData({ notifyEnabled: false })
+            })
+    },
+
+    // 请家长授权上课提醒。
+    //
+    // 必须由用户点击触发（微信禁止自动弹）。这里只说清两件事：
+    //   ① 什么时候会收到 —— 孩子签到成功后
+    //   ② 一次授权只能收一条 —— 一次性订阅的真实语义，不能含糊
+    onNotifyTap() {
+        var that = this
+        if (!that.data.notifyEnabled) return
+
+        track('feedback_action', { type: 'subscribe_request', page_id: 'schedule' })
+
+        subscribe.requestCheckin(that.data.notifyTmplId).then(function (r) {
+            that.setData({ notifyState: subscribe.getLocalState() })
+
+            if (r.ok) {
+                track('feedback_action', { type: 'subscribe_accept', page_id: 'schedule' })
+                wx.showModal({
+                    title: '提醒已开启',
+                    content: '孩子下次上课签到成功后，我们会给你发一条微信通知。' +
+                             '本次授权可收 1 条，收完后可以再来这里开启。',
+                    confirmText: '知道了',
+                    confirmColor: '#2F6BED',
+                    showCancel: false
+                })
+                return
+            }
+
+            if (r.state === 'reject') {
+                track('feedback_action', { type: 'subscribe_reject', page_id: 'schedule' })
+                // 拒绝是正常选择，不追问、不二次弹窗
+                wx.showToast({ title: '已取消，不影响查看课表', icon: 'none' })
+                return
+            }
+
+            wx.showToast({ title: r.msg || '开启失败，请稍后再试', icon: 'none' })
+        })
     },
 
     retry() {
