@@ -1,27 +1,47 @@
 // 微信订阅消息授权
 //
-// 这里只做一件事：请家长授权「上课签到提醒」，拿到一次发送额度。
+// 这里只做一件事：请家长授权「上课提醒」，拿到发送额度。
 //
 // ============================================================
 // 必须理解「一次性订阅」的语义，否则整个功能会做错
 // ============================================================
 //
-// 一次性订阅 = **点一次「允许」，只能收一条消息**。发完额度归零，
-// 下次要发必须再请家长点一次。它不是一个「开关」。
+// 一次性订阅 = **点一次「允许」，只能发一条消息**。发完额度归零。
+// 它不是一个「开启后永久有效」的开关。
+//
+// 但有两个机制能让它「用起来像长期」：
+//
+//   ① **一次弹窗可以勾多个模板，各自 +1 额度。**
+//      所以我们把「上课前提醒」和「签到通知」合在一次弹窗里，
+//      家长点一次「允许」，两个模板各得一条 —— 比弹两次转化率高得多。
+//
+//   ② **勾了「总是保持以上选择，不再询问」之后，
+//      再调用不会弹窗，静默保持之前的选择。**
+//      也就是说家长第二次点「开启」时不会有任何打扰。
+//      但这个勾选框**只在真机显示，模拟器上没有** ——
+//      开发和测试时看不到它属正常，不要据此以为功能没做。
 //
 // 所以：
-//   ① 不能做「开启后永久有效」的开关 UI —— 那是在骗用户。
-//      文案必须说清「本次授权可收 1 条」。
+//   ① 文案写「点一次，之后每次上课都会提醒」是**不准确**的。
+//      准确的说法是「每次授权可收若干条」，但家长不关心额度机制。
+//      折中：文案说清「会收到什么」，不承诺「永久」，也不提「1 条」
+//      这种会让家长觉得「给一条有什么意义」的说法。
 //   ② 不能一进小程序就弹（微信明令禁止诱导/骚扰，会封消息能力）。
-//      只能在用户自己点按钮时弹，且必须有明确的上下文
-//      （「上课提醒」这个按钮点了，弹出请求授权，语义是连贯的）。
+//      只能在用户自己点按钮时弹，且必须有明确的上下文。
 //   ③ 家长点「拒绝」是正常选择，不能反复骚扰。记下拒绝状态，
 //      下次进页面只显示「点击开启」，不主动弹。
 //
-// 长期订阅（一次授权永久有效）只对政务民生、医疗、交通、金融、教育等
-// 线下公共服务的少数二级类目开放，个人主体拿不到。本项目后续会移植到
-// 公司主体、以教育类目申请，届时可以平滑换成长订阅 —— 所以调用方式
-// 统一走这里，将来只改这一个文件。
+// 关于「为什么不按额度记账」
+// --------------------------
+// 曾考虑建一张表记「家长还有几条额度」，并在页面提示续额。
+// 放弃了，原因：微信**没有查询剩余额度的接口**，本地记账必然
+// 与真实状态漂移（家长换手机、清缓存、在别处授权都算不到），
+// 记错的账比不记账更糟 —— 会出现「显示还有 3 条但一条都发不出去」。
+// 现在按「发不出去就算了」处理：43101 当正常状态，家长打开
+// 小程序看课表/上课记录，信息一样拿得到。
+//
+// 将来整体迁移到公司主体后，服务号模板消息能做到「关注后随时发」，
+// 届时换掉这个文件即可，调用方不用改。
 //
 // 参考：https://developers.weixin.qq.com/miniprogram/dev/api/open-api/subscribe-message/wx.requestSubscribeMessage.html
 
@@ -46,18 +66,30 @@ function setLocalState(state) {
 
 // 请家长授权上课提醒。
 //
-// 参数 tmplId：模板 id，由后端 /smart/notify_config/ 下发。
+// 参数 tmplIds：模板 id 数组，由后端 /smart/notify_config/ 下发。
+//   通常含两个：上课前提醒 + 签到通知。传数组是因为微信支持
+//   一次弹窗勾多个 —— 分成两次弹，第二次的拒绝率明显更高。
+//
+// 兼容：老版本调用方传的是单个字符串，这里统一成数组。
+//
 // 返回 Promise，resolve 一个结果对象：
-//   { ok: true,  state: 'accept' }      家长允许了
-//   { ok: false, state: 'reject' }      家长拒绝了（正常选择，不是错误）
-//   { ok: false, state: 'banned' }      模板被后台封禁/删除了，要运营处理
-//   { ok: false, state: 'error', msg }  其它异常
+//   { ok: true,  state: 'accept', accepted: ['tmplA'] }  至少一个模板被允许
+//   { ok: false, state: 'reject' }                       全部被拒绝（正常选择）
+//   { ok: false, state: 'banned' }                       模板被后台封禁/删除
+//   { ok: false, state: 'error', msg }                   其它异常
 //
 // **绝不 reject**：调用方大多是「顺手点一下」的场景，
 // 让每个调用点都写 catch 只会让人漏掉。
-function requestCheckin(tmplId) {
+function requestRemind(tmplIds) {
     return new Promise(function (resolve) {
-        if (!tmplId) {
+        var ids = []
+        if (Object.prototype.toString.call(tmplIds) === '[object Array]') {
+            ids = tmplIds.filter(function (t) { return !!t })
+        } else if (tmplIds) {
+            ids = [tmplIds]
+        }
+
+        if (!ids.length) {
             resolve({ ok: false, state: 'noconfig', msg: '后台还没有配置提醒模板' })
             return
         }
@@ -70,32 +102,49 @@ function requestCheckin(tmplId) {
         }
 
         wx.requestSubscribeMessage({
-            tmplIds: [tmplId],
+            tmplIds: ids,
             success: function (res) {
                 // res[tmplId] 的取值：
-                //   accept  → 允许，获得一次发送额度
+                //   accept  → 允许，该模板获得一次发送额度
                 //   reject  → 拒绝
                 //   ban     → 模板被封禁（运营问题，不是用户问题）
                 //   filter  → 模板标题命中过滤（很少见）
-                var answer = res && res[tmplId]
+                var accepted = []
+                var rejected = 0
+                var banned = false
 
-                if (answer === 'accept') {
+                ids.forEach(function (id) {
+                    var answer = res && res[id]
+                    if (answer === 'accept') accepted.push(id)
+                    else if (answer === 'ban') banned = true
+                    else if (answer === 'reject') rejected += 1
+                })
+
+                if (accepted.length) {
                     setLocalState('accept')
-                    resolve({ ok: true, state: 'accept' })
+                    // banned 单独带出去：哪怕有一个模板成功了，
+                    // 被 ban 的那个也是运营必须处理的问题（模板被删/违规下架）。
+                    // 吞掉的话线上表现是「有一个通知永远收不到，但没人知道为什么」。
+                    resolve({
+                        ok: true,
+                        state: 'accept',
+                        accepted: accepted,
+                        banned: banned
+                    })
                     return
                 }
 
-                if (answer === 'ban') {
+                if (banned) {
                     // 这种不是家长的选择，是配置问题。要显式说出来，
                     // 否则线上表现是「点了没反应」。
                     resolve({ ok: false, state: 'banned', msg: '提醒模板已失效，请联系机构处理' })
                     return
                 }
 
-                // reject / filter 都按「这次没同意」处理。
+                // 全部 reject（或 filter，都不是用户意愿）按「这次没同意」处理。
                 // filter 不记成 reject：它不是用户的意愿，下次还该正常提示。
-                if (answer === 'reject') setLocalState('reject')
-                resolve({ ok: false, state: answer === 'reject' ? 'reject' : 'filter' })
+                if (rejected === ids.length) setLocalState('reject')
+                resolve({ ok: false, state: rejected === ids.length ? 'reject' : 'filter' })
             },
             fail: function (err) {
                 // 常见失败：errCode 20004 用户关闭了订阅消息总开关（在设置里关的），
@@ -114,6 +163,8 @@ function requestCheckin(tmplId) {
 }
 
 module.exports = {
-    requestCheckin: requestCheckin,
+    requestRemind: requestRemind,
+    // 兼容旧调用点（签到通知单模板时期的名字），等价于 requestRemind
+    requestCheckin: requestRemind,
     getLocalState: getLocalState
 }

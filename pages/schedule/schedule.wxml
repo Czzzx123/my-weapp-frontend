@@ -29,16 +29,20 @@
     </view>
 
     <block wx:else>
-        <!-- 上课提醒授权：只在模板配好后才出现。
-             文案必须说清「一次授权收一条」—— 一次性订阅不是开关，
-             说成「开启提醒」会让家长以为以后都能收到。 -->
-        <view wx:if="{{notifyEnabled && notifyState !== 'accept'}}" class="notify-bar tapable" bindtap="onNotifyTap">
+        <!-- 授权条：只在后台配好模板后才出现，**且不因「已授权」而消失**。
+             一次性订阅的额度会被消耗掉，如果授权后就把入口藏起来，
+             家长额度用完后永远没办法再开 —— 那等于提醒功能只能用一次。
+             所以这里是常驻入口：授权过显示「已开启」，点一下仍然有效
+             （勾了「总是保持以上选择」时是静默的，不会打扰）。
+             文案不提「可收几条」：家长关心的是「会不会提醒我」，
+             讲额度机制只会让他觉得这功能没什么意义。 -->
+        <view wx:if="{{notifyEnabled}}" class="notify-bar tapable" bindtap="onNotifyTap">
             <t-icon name="notification" size="34rpx" color="#2F6BED" />
             <view class="notify-text">
-                <text class="notify-title">开启上课签到提醒</text>
-                <text class="notify-sub">孩子签到成功后微信通知你，一次授权可收 1 条</text>
+                <text class="notify-title">{{notifyState === 'accept' ? '上课提醒已开启' : '开启上课提醒'}}</text>
+                <text class="notify-sub">{{notifyState === 'accept' ? '想确保下次也能收到，可以再点一下' : '开课前提醒你，签到成功也通知你'}}</text>
             </view>
-            <text class="notify-btn">开启</text>
+            <text class="notify-btn">{{notifyState === 'accept' ? '续上' : '开启'}}</text>
         </view>
 
         <!-- 停课提示：只标灰不解释，家长会以为页面坏了 -->

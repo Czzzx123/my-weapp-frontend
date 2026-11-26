@@ -143,7 +143,7 @@ Page({
         // 有无停课时段，用于顶部提示
         hasSuspended: false,
         // 订阅消息：模板 id 与是否可授权
-        notifyTmplId: '',
+        notifyTmplIds: [],
         notifyEnabled: false,
         // 家长上次的选择，只用来决定文案。accept 之后额度可能已用掉，
         // 所以不能理解成「已开启」。
@@ -214,8 +214,14 @@ Page({
         var that = this
         return request({ url: api.notify_config, showLoading: false, showError: false })
             .then(function (res) {
+                // tmpl_ids 是后端拼好的完整列表（上课前提醒 + 签到通知）。
+                // 老版本后端没有这个字段，退回用单个 template_id 兜底，
+                // 免得后端先上线、前端还没更新时按钮消失。
+                var ids = (res && res.tmpl_ids) || []
+                if (!ids.length && res && res.template_id) ids = [res.template_id]
+
                 that.setData({
-                    notifyTmplId: (res && res.template_id) || '',
+                    notifyTmplIds: ids,
                     notifyEnabled: !!(res && res.enabled),
                     notifyState: subscribe.getLocalState()
                 })
@@ -229,24 +235,44 @@ Page({
 
     // 请家长授权上课提醒。
     //
-    // 必须由用户点击触发（微信禁止自动弹）。这里只说清两件事：
-    //   ① 什么时候会收到 —— 孩子签到成功后
-    //   ② 一次授权只能收一条 —— 一次性订阅的真实语义，不能含糊
+    // 必须由用户点击触发（微信禁止自动弹）。
+    //
+    // 文案的取舍：不提「1 条」。家长看到「一次授权可收 1 条」会觉得
+    // 这功能没意义 —— 而实际上一个弹窗能勾两个模板、各自拿一条额度，
+    // 家长日常打开课表时还会再攒。说清「会收到什么」比解释额度机制有用。
     onNotifyTap() {
         var that = this
         if (!that.data.notifyEnabled) return
 
         track('feedback_action', { type: 'subscribe_request', page_id: 'schedule' })
 
-        subscribe.requestCheckin(that.data.notifyTmplId).then(function (r) {
+        subscribe.requestRemind(that.data.notifyTmplIds).then(function (r) {
             that.setData({ notifyState: subscribe.getLocalState() })
 
             if (r.ok) {
                 track('feedback_action', { type: 'subscribe_accept', page_id: 'schedule' })
+
+                if (r.banned) {
+                    // 部分模板被封禁：家长允许了，但有一条永远收不到。
+                    // 这里必须说出来 —— 否则线上表现是「开启了却只收到一半」，
+                    // 谁都不知道是模板被下架了。
+                    wx.showModal({
+                        title: '提醒部分开启',
+                        content: '有一类提醒暂时不可用，我们已经在处理。' +
+                                 '另一类通知可以正常收到。',
+                        confirmText: '知道了',
+                        confirmColor: '#2F6BED',
+                        showCancel: false
+                    })
+                    return
+                }
+
+                // 不提「可收 N 条」。家长要的是「会不会提醒我」，
+                // 讲额度机制只会让他觉得「给几条有什么意义」。
                 wx.showModal({
                     title: '提醒已开启',
-                    content: '孩子下次上课签到成功后，我们会给你发一条微信通知。' +
-                             '本次授权可收 1 条，收完后可以再来这里开启。',
+                    content: '开课前会提醒你，孩子签到成功后也会通知你。' +
+                             '如果之后没收到，来这里再点一次就能恢复。',
                     confirmText: '知道了',
                     confirmColor: '#2F6BED',
                     showCancel: false
