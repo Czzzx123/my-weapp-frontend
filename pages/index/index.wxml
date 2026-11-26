@@ -102,4 +102,33 @@
     </view>
 
     <view class="safe-bottom"></view>
+
+    <!-- 订阅提醒引导弹层
+         为什么自己画一个而不是直接调微信授权框：见 index.js 的 initSubscribe 注释。
+         文案只讲「你会收到什么」，不讲「一次性订阅有几条额度」——
+         家长关心的是能不能收到，不是机制。 -->
+    <view wx:if="{{subscribeVisible}}" class="sub-mask" catchtouchmove="noop">
+        <view class="sub-sheet">
+            <view class="sub-icon">
+                <t-icon name="notification" size="56rpx" color="#2F6BED" />
+            </view>
+            <text class="sub-title">开启上课提醒</text>
+            <text class="sub-desc">开启后，下面这些消息会通过微信通知你：</text>
+
+            <view class="sub-list">
+                <view class="sub-item">
+                    <view class="sub-dot"></view>
+                    <text class="sub-item-text">上课前提醒，别忘了送孩子</text>
+                </view>
+                <view class="sub-item">
+                    <view class="sub-dot"></view>
+                    <text class="sub-item-text">孩子签到成功，到校即知道</text>
+                </view>
+            </view>
+
+            <view class="sub-accept tapable" bindtap="onSubscribeAccept">开启提醒</view>
+            <view class="sub-later tapable" bindtap="onSubscribeClose">暂不需要</view>
+            <view class="sub-mute tapable" bindtap="onSubscribeMute">不再提示</view>
+        </view>
+    </view>
 </view>

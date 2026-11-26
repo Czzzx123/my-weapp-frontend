@@ -269,3 +269,129 @@ page {
     font-size: var(--wl-fs-sub);
     color: var(--wl-text-3);
 }
+
+/* ============================================================
+   订阅提醒引导弹层
+   ============================================================ */
+
+/* 遮罩：z-index 要高于所有内容，但低于系统弹窗（微信授权框由系统绘制，
+   不参与我们的层级，所以不用考虑） */
+.sub-mask {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.45);
+    z-index: 900;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+/* 底部卡片：从下往上弹，比居中弹窗更「轻」，用户不觉得被拦住 */
+.sub-sheet {
+    width: 100%;
+    background: #ffffff;
+    border-radius: 32rpx 32rpx 0 0;
+    padding: var(--wl-sp-4) var(--wl-sp-4) calc(var(--wl-sp-4) + env(safe-area-inset-bottom));
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    animation: sub-rise 0.22s ease-out;
+}
+
+@keyframes sub-rise {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.sub-icon {
+    width: 96rpx;
+    height: 96rpx;
+    border-radius: 48rpx;
+    background: #EAF1FF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--wl-sp-3);
+}
+
+.sub-title {
+    font-size: 36rpx;
+    font-weight: 500;
+    color: var(--wl-text-1);
+    text-align: center;
+    margin-bottom: var(--wl-sp-1);
+}
+
+.sub-desc {
+    font-size: 26rpx;
+    color: var(--wl-text-2);
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: var(--wl-sp-3);
+}
+
+.sub-list {
+    background: #F5F8FF;
+    border-radius: 16rpx;
+    padding: var(--wl-sp-3);
+    margin-bottom: var(--wl-sp-4);
+}
+
+.sub-item {
+    display: flex;
+    align-items: center;
+}
+
+.sub-item + .sub-item {
+    margin-top: var(--wl-sp-2);
+}
+
+/* 用一个小圆点代替图标：这里的两条都是「会收到什么」，
+   用图标反而让人以为能点 */
+.sub-dot {
+    width: 10rpx;
+    height: 10rpx;
+    border-radius: 5rpx;
+    background: #2F6BED;
+    margin-right: var(--wl-sp-2);
+    flex-shrink: 0;
+}
+
+.sub-item-text {
+    font-size: 27rpx;
+    color: var(--wl-text-1);
+    line-height: 1.5;
+}
+
+.sub-accept {
+    width: 100%;
+    height: 88rpx;
+    border-radius: 44rpx;
+    background: #2F6BED;
+    color: #ffffff;
+    font-size: 30rpx;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sub-later {
+    text-align: center;
+    font-size: 27rpx;
+    color: var(--wl-text-2);
+    padding: var(--wl-sp-3) 0 var(--wl-sp-1);
+}
+
+/* 「不再提示」字号更小、颜色更淡：它是逃生口，不是主选项，
+   但必须存在 —— 否则用户只能靠「拒绝授权」来摆脱弹层，
+   那会让他以后想开也开不了（微信记着拒绝状态）。 */
+.sub-mute {
+    text-align: center;
+    font-size: 24rpx;
+    color: var(--wl-text-3);
+    padding: var(--wl-sp-1) 0;
+}

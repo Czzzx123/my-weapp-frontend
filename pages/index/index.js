@@ -1,6 +1,7 @@
 // index.js
 import api from "../../config/settings"
 import request from "../../utils/request"
+import subscribe from "../../utils/subscribe"
 import { track } from "../../utils/track"
 
 // 公告关闭状态按日记忆
@@ -36,13 +37,28 @@ Page({
         // 上课日常：真实数据由 fetchDaily() 填入，这里给空数组而不是假数据。
         // 空数据显示占位文案（dailyEmpty），避免首页一进来闪一下假卡片。
         daily_list: [],
-        dailyEmpty: false
+        dailyEmpty: false,
+
+        // 订阅提醒引导弹层。
+        //
+        // 为什么首页要弹：家长不会主动去课表页找那个「开启提醒」按钮，
+        // 绝大多数人一辈子都不会点。而「有没有授权」直接决定提醒
+        // 能不能发出去 —— 不主动引导，功能等于没做。
+        //
+        // 为什么自己画弹层而不是直接调微信授权框：
+        // ① 微信禁止一进页面就弹授权（诱导授权，会被收回消息能力）；
+        // ② 直接弹的话家长不知道「批准了能收到什么」，只会顺手点拒绝。
+        //   先用自己的弹层说清价值，再调授权框，这是合规且有效的做法。
+        subscribeVisible: false,
+        // 模板 id 缓存：弹层点了才用，不用每次进页面都请求
+        _tmplIds: []
     },
 
     onLoad() {
         this.initNotice()
         this.fetchBanner()
         this.fetchDaily(true)
+        this.initSubscribe()
     },
 
     onShow() {
@@ -106,6 +122,111 @@ Page({
         this.setData({ noticeVisible: false })
         track('feedback_action', { type: 'notice_close', page_id: 'index' })
     },
+
+    // ============================================================
+    // 订阅提醒引导
+    // ============================================================
+    //
+    // 时序上有个坑必须记牢：
+    //   wx.requestSubscribeMessage 要求在**用户点击的同步调用栈**里发起。
+    //   如果用户点了「开启」，我们先 await 一个接口拿模板 id，再调授权 ——
+    //   手势已经失效，微信直接返回
+    //   `can only be invoked by user TAP gesture`，弹都弹不出来。
+    //
+    // 所以模板 id 必须在**页面加载时**就拉好存起来，点击时只用缓存。
+    initSubscribe() {
+        var that = this
+
+        // 先问本地「该不该弹」，不该弹就完全不请求接口，
+        // 省一次网络请求也避免无事发生
+        if (!subscribe.shouldPrompt()) return
+
+        request({ url: api.notify_config, showLoading: false, showError: false })
+            .then(function (res) {
+                var ids = (res && res.tmpl_ids) || []
+                if (!ids.length && res && res.template_id) ids = [res.template_id]
+                if (!ids.length) return   // 后台没配模板，弹了也是白弹
+
+                that.setData({ _tmplIds: ids, subscribeVisible: true })
+                // 记一次「弹过了」—— 放在这里（真的显示了）而不是发起请求前，
+                // 否则请求失败也算次数，白白耗掉 3 次机会。
+                subscribe.markPrompted()
+                track('page_view', { page_id: 'index_subscribe_prompt' })
+            })
+            .catch(function () {
+                // 拿不到配置就不弹。订阅是附加功能，不该在首页弹错误。
+            })
+    },
+
+    // 点了「开启提醒」。
+    //
+    // 这里**必须是同步调** requestRemind，中间不能有任何异步操作 ——
+    // 见 initSubscribe 的注释。
+    onSubscribeAccept() {
+        var that = this
+        var ids = that.data._tmplIds
+        if (!ids || !ids.length) {
+            that.setData({ subscribeVisible: false })
+            return
+        }
+
+        // 注意：track 目前是纯同步的（utils/track.js 里 SEND=false），
+        // 所以它夹在点击和授权之间不会断掉手势栈。
+        // **哪天把埋点改成异步上报（await 或回调里再调授权），
+        // 这里的 requestRemind 就再也弹不出授权框了** ——
+        // 微信会返回 can only be invoked by user TAP gesture。
+        // 真要把埋点改成异步，必须把 track 挪到 requestRemind 之后。
+        track('feedback_action', { type: 'subscribe_request', page_id: 'index' })
+
+        subscribe.requestRemind(ids).then(function (r) {
+            that.setData({ subscribeVisible: false })
+
+            if (r.ok) {
+                track('feedback_action', { type: 'subscribe_accept', page_id: 'index' })
+                if (r.banned) {
+                    wx.showModal({
+                        title: '提醒部分开启',
+                        content: '有一类提醒暂时不可用，我们已经在处理。另一类可以正常收到。',
+                        confirmText: '知道了',
+                        confirmColor: '#2F6BED',
+                        showCancel: false
+                    })
+                    return
+                }
+                wx.showToast({ title: '开课和签到都会提醒你', icon: 'none' })
+                return
+            }
+
+            if (r.state === 'reject') {
+                track('feedback_action', { type: 'subscribe_reject', page_id: 'index' })
+                // 拒绝是正常选择。不追问、不二次弹窗 ——
+                // 但要把「随时能在课表页再开」说出来，否则他以后想开也找不到。
+                wx.showToast({ title: '已跳过，可在课表页随时开启', icon: 'none' })
+                return
+            }
+
+            wx.showToast({ title: r.msg || '开启失败，请稍后再试', icon: 'none' })
+        })
+    },
+
+    // 点了「暂不需要」。只关掉这一次，下次进页面还可能再弹
+    // （受 MAX_PROMPT 和 24 小时间隔约束）。
+    onSubscribeClose() {
+        this.setData({ subscribeVisible: false })
+        track('feedback_action', { type: 'subscribe_dismiss', page_id: 'index' })
+    },
+
+    // 点了「不再提示」。永久不再主动弹，只剩课表页的常驻按钮。
+    onSubscribeMute() {
+        subscribe.mutePrompt()
+        this.setData({ subscribeVisible: false })
+        track('feedback_action', { type: 'subscribe_mute', page_id: 'index' })
+        wx.showToast({ title: '不再提示，可在课表页开启', icon: 'none' })
+    },
+
+    // 空函数：给弹层的 catchtouchmove 用，阻止背景跟着滚动。
+    // 没有它，手指在弹层上滑动时底层页面会一起动，看起来像页面错位。
+    noop() { },
 
     // 拉取 banner 和通知
     fetchBanner() {

@@ -46,6 +46,21 @@
 // 参考：https://developers.weixin.qq.com/miniprogram/dev/api/open-api/subscribe-message/wx.requestSubscribeMessage.html
 
 var STORAGE_KEY = 'wl_subscribe_checkin'
+// 「弹过几次」与「上次弹的时间」，用来控制频率
+var PROMPT_COUNT_KEY = 'wl_subscribe_prompt_count'
+var PROMPT_LAST_KEY = 'wl_subscribe_prompt_last'
+// 「别再来烦我」——用户明确拒绝过 N 次或点了「不再提示」
+var PROMPT_MUTE_KEY = 'wl_subscribe_prompt_mute'
+
+// 首页弹层最多主动出现几次。
+//
+// 为什么要有上限：微信把「反复弹订阅框」明确列为骚扰行为，
+// 屡犯会被收回消息能力 —— 那等于把整个提醒功能砸了。
+// 3 次是经验值：正常用户第 1 次就会决定，愿意等的人第 2、3 次也够了。
+// 之后只剩课表页那个常驻按钮，用户想开自己点。
+var MAX_PROMPT = 3
+// 两次主动弹之间至少隔多久（毫秒）。一天最多烦一次。
+var PROMPT_INTERVAL = 24 * 60 * 60 * 1000
 
 // 读本地记录的授权状态：'accept' | 'reject' | ''
 // 只用于决定「文案怎么说」，不作为「能不能发」的依据 ——
@@ -61,6 +76,52 @@ function getLocalState() {
 function setLocalState(state) {
     try {
         wx.setStorageSync(STORAGE_KEY, state)
+    } catch (e) { }
+}
+
+function _readNum(key) {
+    var v = wx.getStorageSync(key)
+    return typeof v === 'number' ? v : 0
+}
+
+// 首页该不该主动弹订阅引导。
+//
+// 四个条件全满足才弹：
+//   ① 后台配了模板（没配弹了也是白弹）
+//   ② 用户没点过「不再提示」
+//   ③ 还没授权过（授权过就不用再劝了）
+//   ④ 弹的次数 < MAX_PROMPT，且距上次 ≥ PROMPT_INTERVAL
+//
+// **不满足第 ③ 条时返回 false 很重要**：已授权还反复弹，用户会觉得
+// 这小程序有病。额度耗尽时的补授权走课表页那个常驻按钮，
+// 那是用户主动点，不构成骚扰。
+function shouldPrompt() {
+    try {
+        if (wx.getStorageSync(PROMPT_MUTE_KEY)) return false
+        if (getLocalState() === 'accept') return false
+        if (_readNum(PROMPT_COUNT_KEY) >= MAX_PROMPT) return false
+        var last = _readNum(PROMPT_LAST_KEY)
+        if (last && Date.now() - last < PROMPT_INTERVAL) return false
+        return true
+    } catch (e) {
+        // 读存储失败就不弹 —— 宁可少弹一次，也不要因为异常反复弹
+        return false
+    }
+}
+
+// 记一次「弹过了」。**必须在真正弹给用户看的时候调**，
+// 不能提前调 —— 否则弹层因为别的原因没显示出来，次数也白白扣掉了。
+function markPrompted() {
+    try {
+        wx.setStorageSync(PROMPT_COUNT_KEY, _readNum(PROMPT_COUNT_KEY) + 1)
+        wx.setStorageSync(PROMPT_LAST_KEY, Date.now())
+    } catch (e) { }
+}
+
+// 用户点了「不再提示」。永久生效，只有清缓存才会恢复。
+function mutePrompt() {
+    try {
+        wx.setStorageSync(PROMPT_MUTE_KEY, 1)
     } catch (e) { }
 }
 
@@ -166,5 +227,8 @@ module.exports = {
     requestRemind: requestRemind,
     // 兼容旧调用点（签到通知单模板时期的名字），等价于 requestRemind
     requestCheckin: requestRemind,
-    getLocalState: getLocalState
+    getLocalState: getLocalState,
+    shouldPrompt: shouldPrompt,
+    markPrompted: markPrompted,
+    mutePrompt: mutePrompt
 }
