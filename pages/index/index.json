@@ -1,5 +1,7 @@
 {
     "usingComponents": {},
     "navigationBarTitleText": "未蓝科技",
-    "enablePullDownRefresh": true
+    "enablePullDownRefresh": true,
+    "onReachBottomDistance": 200,
+    "backgroundTextStyle": "dark"
 }

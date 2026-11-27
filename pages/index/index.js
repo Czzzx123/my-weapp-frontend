@@ -39,6 +39,22 @@ Page({
         daily_list: [],
         dailyEmpty: false,
 
+        // ---- 无限滚动的四个状态位（2026-11-27 加）----
+        //
+        // dailyHasMore 初值给 true 而不是 false：接口还没回来时列表是空的，
+        // 若给 false，第一批数据一到就会顶上「已经到底啦」——
+        // 明明下面还有好几页。等接口返回再按真实的 has_more 改。
+        dailyHasMore: true,
+        // 首屏加载中（列表还是空的时候显示整块占位）
+        dailyLoading: false,
+        // 触底加载中（只显示底部那一行「加载中」）
+        dailyLoadingMore: false,
+        // 下一页加载失败（底部变成可点重试）
+        dailyLoadError: false,
+        // 当前展示的是离线降级假数据。底部文案要说实话，
+        // 不能让家长以为「就这么多内容」。
+        dailyFallback: false,
+
         // 订阅提醒引导弹层。
         //
         // 为什么首页要弹：家长不会主动去课表页找那个「开启提醒」按钮，
@@ -65,8 +81,19 @@ Page({
         track('page_view', { page_id: 'index' })
     },
 
+    // 页面卸载：断开所有曝光观察器。
+    // 不断开的话，每次进页面都会新挂一批 observer —— 小程序单页实例
+    // 未必被回收，久了就是内存泄漏 + 后台空跑回调。
+    onUnload() {
+        this._clearExposeObservers()
+    },
+
     // 下拉刷新（index.json 已开启 enablePullDownRefresh）
     onPullDownRefresh() {
+        // 刷新要**重置游标**回到第一页。不重置的话，刷完还是接着上次的位置，
+        // 家长下拉半天看到的还是旧内容，会以为刷新没生效。
+        this._cursor = null
+
         // 刷新不重新上报曝光：曝光口径是「首次出现在屏幕上」，
         // 每次下拉都报一遍会让分母虚高。所以第二个参数传 false。
         Promise.all([
@@ -75,6 +102,28 @@ Page({
         ]).then(function () {
             wx.stopPullDownRefresh()
         })
+    },
+
+    // 触底加载下一页（2026-11-27 加）
+    //
+    // 什么时候不加载：
+    // ① 还有请求在路上 —— 连滑两次会发两个重复请求，回来都是同一页数据
+    // ② 已经到底 —— has_more=false 之后不该再问
+    // ③ 降级中 —— 假数据没有「下一页」，接了会拿到真数据把界面搞混
+    // ④ 空列表 —— 由空状态占位负责，不是「触底」
+    onReachBottom() {
+        if (this.data.dailyLoading || this.data.dailyLoadingMore) return
+        if (!this.data.dailyHasMore) return
+        if (this.data.dailyFallback) return
+        if (!this.data.daily_list.length) return
+
+        this.loadMoreDaily()
+    },
+
+    // 底部「网络不太顺，点击重试」
+    onRetryMore() {
+        if (this._loadLock) return
+        this.loadMoreDaily()
     },
 
     // 把本地收藏状态合并进列表（WXML 不支持 indexOf，故落到 item.collected 字段）
@@ -97,19 +146,108 @@ Page({
     // 双报会让曝光漏斗分母虚高、曝光→收藏/分享归因失真。
     // 实现方式：把「取数」「上报」绑在同一处（applyDaily），谁最终决定了页面
     // 上显示的内容，就由谁按对应 mode 上报，物理上不可能报两次。
-    reportDailyExpose(list, mode) {
-        var source = list || this.data.daily_list
+    //
+    // ---- 2026-11-27 改：从「前 3 条」改成「真进屏幕」 ----
+    //
+    // 原来写死 `source.slice(0, 3)`，因为那时首页只有 3 张卡，等于全报。
+    // 改成无限滚动后这个写法会失真：首屏 6 条全报 = 分母直接翻倍，
+    // 而屏幕上其实只看得到 2~3 张，曝光率会掉到 40% 以下，看着像「内容没人看」。
+    //
+    // 现在用 IntersectionObserver 判定卡片是否真进了可视区。
+    // 已报过的 id 记在 _exposedIds 里，翻回来不会再报第二次 ——
+    // 曝光是「首次出现在屏幕上」，重复报会让同一张卡贡献多次曝光。
+    reportDailyExpose(list, mode, startIndex) {
+        var that = this
         var reportMode = mode || 'fallback'
-        setTimeout(function () {
-            source.slice(0, 3).forEach(function (item, index) {
-                track('daily_card_expose', {
-                    item_id: item.id,
-                    pos: index,
-                    title: item.title,
-                    mode: reportMode
+        var begin = startIndex || 0
+
+        // 小程序的 IntersectionObserver 只能按选择器批量观察页面节点，
+        // 没法直接观察 JS 对象。所以先算出「这次新加进来的 id」，
+        // 再用 id 拼选择器去观察对应的卡片节点。
+        var ids = (list || []).slice(begin).map(function (d, i) {
+            return { id: String(d.id), pos: begin + i, item: d }
+        })
+        if (!ids.length) return
+
+        this._exposedIds = this._exposedIds || {}
+        var pending = ids.filter(function (x) { return !that._exposedIds[x.id] })
+        if (!pending.length) return
+
+        var report = function (x) {
+            if (that._exposedIds[x.id]) return
+            that._exposedIds[x.id] = true
+            track('daily_card_expose', {
+                item_id: x.item.id,
+                pos: x.pos,
+                title: x.item.title,
+                mode: reportMode
+            })
+        }
+
+        // 兜底：没有 IntersectionObserver（极低版本基础库）就退回老口径 ——
+        // 只报前 3 条。宁可数据粗略，也不能一条都不报、让曝光口径断掉。
+        if (!wx.createIntersectionObserver) {
+            setTimeout(function () { pending.slice(0, 3).forEach(report) }, 300)
+            return
+        }
+
+        // ---- 必须等渲染完再 observe（这里踩过坑）----
+        //
+        // setData 是异步的：applyDaily / loadMoreDaily 里 setData 之后
+        // 立刻调本函数，此刻新卡片的节点**还没挂到渲染树上**。
+        // 这时候 observer.observe('.daily-card-7') 不会报错，
+        // 它只是「观察一个不存在的节点」，回调永远不触发 ——
+        // 页面看着一切正常，埋点却一条都没有，而且 console 里干干净净。
+        // 这种静默失败只能靠 review 抓，运行时没有任何征兆。
+        //
+        // wx.nextTick 保证在下一帧渲染完成后执行；老基础库没有它就用
+        // 小延迟兜底。
+        var startObserve = function () {
+            var observer = wx.createIntersectionObserver(that, {
+                // 阈值 0：只要卡片露出一像素就算看见。
+                // 设成 0.5 的话，长文本卡片要滑到屏幕中间才计曝光，
+                // 而家长快速划过时可能只看清标题 —— 那也是「确实看到了」。
+                thresholds: [0]
+            })
+            observer.relativeToViewport({ bottom: 0 })
+
+            var remain = pending.length
+            var done = function () {
+                remain -= 1
+                if (remain <= 0) {
+                    // 全部报完才断开。**不能用固定时长强制断开** ——
+                    // 家长慢慢滑的时候，第 6 张卡可能十几秒后才进屏幕，
+                    // 3 秒就断等于漏报。断开是为了省资源，不是赶时间。
+                    try { observer.disconnect() } catch (e) { }
+                }
+            }
+
+            pending.forEach(function (x) {
+                observer.observe('.daily-card-' + x.id, function (res) {
+                    if (that._exposedIds[x.id]) return
+                    if (res.intersectionRatio <= 0) return
+                    report(x)
+                    done()
                 })
             })
-        }, 300)
+
+            that._exposeObservers = that._exposeObservers || []
+            that._exposeObservers.push(observer)
+        }
+
+        if (wx.nextTick) {
+            wx.nextTick(startObserve)
+        } else {
+            setTimeout(startObserve, 50)
+        }
+    },
+
+    // 页面卸载/pull 重置时清理观察器
+    _clearExposeObservers() {
+        (this._exposeObservers || []).forEach(function (o) {
+            try { o.disconnect() } catch (e) { }
+        })
+        this._exposeObservers = []
     },
 
     // 公告：当日已关闭则不再显示
@@ -254,28 +392,65 @@ Page({
             })
     },
 
-    gotoActivity() {
-        wx.switchTab({ url: '/pages/activity/activity' })
-    },
+    // ============================================================
+    // 上课日常：游标分页 + 失败降级 mock
+    // ============================================================
+    //
+    // 游标（_cursor）是**上一页最后一条的 id**，存在实例属性里而不是 data：
+    // 它不参与渲染，进 data 只会每翻一页触发一次无意义的 setData。
+    //
+    // 为什么用游标不用页码：家长正划着的时候运营发了一条新动态，
+    // 页码分页会让整体偏移一格，第 2 页把第 1 页最后一条再发一遍。
+    // 游标锚在 id 上，插入新记录不影响已翻过的位置。
 
-    // ============================================================
-    // 上课日常：接口 → 失败降级 mock
-    // ============================================================
+    // 是否正在请求第一页（防重复）
+    _loadingFirst: false,
+    // 是否正在请求下一页（防重复）
+    _loadLock: false,
+    // 游标
+    _cursor: null,
 
     // shouldReport：本次取数要不要上报曝光埋点。
     // onLoad 传 true（首屏曝光），下拉刷新传 false（否则分母虚高）。
     fetchDaily(shouldReport) {
         var that = this
+        if (this._loadingFirst) return Promise.resolve()
+        this._loadingFirst = true
+
+        // 重置游标和曝光记录：这是「第一页」，后面的翻页都从这重新算。
+        // 不重置 _exposedIds 的话，下拉刷新后新发的动态会被当成
+        // 「已经报过」（id 碰巧相同的话），曝光就漏了。
+        this._cursor = null
+        this._exposedIds = {}
+        this._autoLoadTries = 0
+        this._clearExposeObservers()
+
+        this.setData({
+            dailyLoading: true,
+            dailyEmpty: false,
+            dailyLoadError: false,
+            dailyHasMore: true
+        })
+
         return request({ url: api.learning, showLoading: false, showError: false })
             .then((res) => {
                 var list = (res && res.daily) || []
                 if (list.length) {
-                    that.applyDaily(that.mergeCollected(list), 'api', shouldReport)
+                    that._cursor = res.next_cursor || null
+                    that.applyDaily(that.mergeCollected(list), 'api', shouldReport, {
+                        hasMore: !!res.has_more,
+                        fallback: false
+                    })
                     return
                 }
                 // 接口通了但后台一条都没录：这不是错误，是「还没发内容」。
                 // 此时列表留空、显示占位文案，不要拿假数据糊弄家长。
-                that.setData({ daily_list: [], dailyEmpty: true })
+                that.setData({
+                    daily_list: [],
+                    dailyEmpty: true,
+                    dailyLoading: false,
+                    dailyHasMore: false
+                })
             })
             .catch((err) => {
                 if (err && err.type === 'business') {
@@ -284,17 +459,138 @@ Page({
                 } else {
                     console.log('[首页] 上课日常接口不可用，降级本地 mock')
                 }
-                that.applyDaily(that.mergeCollected(MOCK_DAILY), 'fallback', shouldReport)
+                that.applyDaily(that.mergeCollected(MOCK_DAILY), 'fallback', shouldReport, {
+                    hasMore: false,
+                    fallback: true
+                })
+            })
+            .then(function () {
+                that._loadingFirst = false
             })
     },
 
-    // 唯一写 daily_list 的地方。
-    // 曝光上报绑在这里，保证「页面显示的是谁的数据，就按谁的 mode 报一次」。
-    applyDaily(list, mode, shouldReport) {
-        this.setData({ daily_list: list, dailyEmpty: false })
-        if (shouldReport) {
-            this.reportDailyExpose(list, mode)
+    // 触底加载下一页
+    loadMoreDaily() {
+        var that = this
+        if (this._loadLock) return
+        if (!this._cursor) {
+            // 没有游标说明后端没给下一页（老接口或数据异常）。
+            // 直接标记到底，不要发一个没有 before 的请求 ——
+            // 那会拿回第一页，看起来像「加载更多却重复了前几条」。
+            this.setData({ dailyHasMore: false })
+            return
         }
+        this._loadLock = true
+        this.setData({ dailyLoadingMore: true, dailyLoadError: false })
+
+        var url = api.learning + '?before=' + this._cursor
+        var startIndex = this.data.daily_list.length
+
+        return request({ url: url, showLoading: false, showError: false })
+            .then((res) => {
+                var list = (res && res.daily) || []
+                that._cursor = res.next_cursor || null
+
+                if (!list.length) {
+                    that.setData({
+                        dailyLoadingMore: false,
+                        dailyHasMore: false
+                    })
+                    return
+                }
+
+                // 追加而不是替换。重复 id 要过滤掉 ——
+                // 理论上游标分页不会重复，但万一后端游标逻辑出错，
+                // 界面出现两张一样的卡比少一条更难解释。
+                var existing = {}
+                that.data.daily_list.forEach(function (d) { existing[String(d.id)] = true })
+                var fresh = list.filter(function (d) { return !existing[String(d.id)] })
+
+                var merged = that.data.daily_list.concat(that.mergeCollected(fresh))
+                that.setData({
+                    daily_list: merged,
+                    dailyLoadingMore: false,
+                    dailyHasMore: !!res.has_more
+                })
+
+                // 触底追加的卡片**也要报曝光**（它们同样是首次进屏幕）。
+                // startIndex 告诉 reportDailyExpose「从第几条开始算新增」，
+                // pos 用全局位置，这样漏斗里能看出「第 3 条比第 12 条曝光多」。
+                that.reportDailyExpose(merged, 'api', startIndex)
+
+                // 补一页之后可能还是不够一屏（卡片矮、配图少），再探一次。
+                // _autoLoadTries 会兜住，最多补 3 轮。
+                that._maybeAutoLoad()
+            })
+            .catch((err) => {
+                console.log('[首页] 加载更多失败:', err && err.type, err && err.code)
+                // 失败不把已加载的内容清掉 —— 那等于惩罚用户。
+                // 只在底部显示可点重试。
+                that.setData({
+                    dailyLoadingMore: false,
+                    dailyLoadError: true
+                })
+            })
+            .then(function () {
+                that._loadLock = false
+            })
+    },
+
+    // 唯一写 daily_list 的地方（第一页专用）。
+    // 曝光上报绑在这里，保证「页面显示的是谁的数据，就按谁的 mode 报一次」。
+    applyDaily(list, mode, shouldReport, flags) {
+        var extra = flags || {}
+        this.setData({
+            daily_list: list,
+            dailyEmpty: false,
+            dailyLoading: false,
+            dailyHasMore: extra.hasMore !== false,
+            dailyFallback: !!extra.fallback
+        })
+        if (shouldReport) {
+            // 第一页从第 0 条开始算新增
+            this.reportDailyExpose(list, mode, 0)
+        }
+        // 首屏数据不够长时，触底回调永远不会触发（页面根本没得滚），
+        // 后面的内容就永远出不来。这里主动探一下。
+        this._maybeAutoLoad()
+    },
+
+    // 内容不足一屏时，onReachBottom 不会触发 —— 主动补一页。
+    //
+    // 什么情况会遇到：后台把 LearningPost 配得少（比如只有 6 条，
+    // 第一页刚好取完），或卡片变矮（配图全被运营删了）。
+    // 表现是首页底部空着，家长以为「就这么多」，其实后面还有。
+    //
+    // 判断方式：页脚节点是否已经进入屏幕。进了 = 没有可滚动空间。
+    // **必须防死循环**：如果每页只有 1 条且都很矮，会连翻十几页。
+    // _autoLoadTries 限制最多补 3 次，剩下的交给用户手动滑。
+    _autoLoadTries: 0,
+    _maybeAutoLoad() {
+        var that = this
+        if (!this.data.dailyHasMore) return
+        // 一张卡加页脚的最小高度约 200rpx（100px）。
+        // 连续补 3 次还填不满一屏，说明内容真的很少，不该无限翻下去。
+        if (this._autoLoadTries >= 3) return
+
+        // 等渲染完成再量高度
+        var measure = function () {
+            var query = wx.createSelectorQuery()
+            query.select('.daily-foot').boundingClientRect()
+            query.exec(function (res) {
+                var rect = res && res[0]
+                if (!rect) return
+                var win = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync()
+                // 页脚底边已经在视口内，说明列表没填满一屏
+                if (rect.bottom <= win.windowHeight && that.data.dailyHasMore) {
+                    that._autoLoadTries += 1
+                    that.loadMoreDaily()
+                }
+            })
+        }
+
+        if (wx.nextTick) wx.nextTick(measure)
+        else setTimeout(measure, 100)
     },
 
     // 图片加载失败（后台换了图但文件被删、域名没配白名单等）：

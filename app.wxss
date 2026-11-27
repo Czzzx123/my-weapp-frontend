@@ -130,11 +130,10 @@ page {
   color: var(--wl-text-1);
 }
 
-.section-more {
-  font-size: var(--wl-fs-sub);
-  color: var(--wl-brand);
-  padding: var(--wl-sp-1) 4rpx;
-}
+/* .section-more 已于 2026-11-27 删除：
+   它是首页「上课日常 → 查看全部」那个链接的样式，全项目仅此一处引用。
+   那个入口随无限滚动上线一起去掉了（列表本身就能一滑到底，
+   没必要再单开一页），样式留着就是死代码。 */
 
 /* ========== 辅助文字 ========== */
 .muted {

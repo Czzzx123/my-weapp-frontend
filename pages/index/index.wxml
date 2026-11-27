@@ -35,16 +35,32 @@
         </view>
     </view>
 
-    <!-- 上课日常 -->
+    <!-- 上课日常
+         这里原来右边有个「查看全部」，点了跳学习服务页（tabBar 页）。
+         2026-11-27 去掉：上课日常本身就是公开的课程活动介绍，
+         家长要看全部就直接往下滑，没有必要为此单开一页。
+         学习服务页是另一个东西（课表/记录/请假入口），不该被当成列表页。 -->
     <view class="section-header">
         <view class="section-left">
             <view class="section-bar"></view>
             <text class="section-title">上课日常</text>
         </view>
-        <text class="section-more tapable" bindtap="gotoActivity">查看全部</text>
     </view>
 
-    <view class="daily-card card" wx:for="{{daily_list}}" wx:key="id">
+    <!-- 首屏加载占位：列表还是空的、接口还没回来。
+         没有它的话进页面先是一片白，家长会以为坏了。 -->
+    <view wx:if="{{dailyLoading && !daily_list.length}}" class="daily-loading card">
+        <view class="daily-loading-dot"></view>
+        <text class="daily-loading-text">正在加载…</text>
+    </view>
+
+    <!-- 卡片带 daily-card-{{item.id}} 这个类，是给曝光埋点用的：
+         IntersectionObserver 只能按选择器观察节点，认 class 不认 dataset。
+         两个类同时挂着，样式仍由 .daily-card 生效。 -->
+    <view class="daily-card daily-card-{{item.id}} card"
+          wx:for="{{daily_list}}"
+          wx:key="id"
+          data-id="{{item.id}}">
         <!--
             通栏图：课程/活动的实拍展示，放在标题下方、正文上方。
             后端没配图时整块不渲染（img 为空串也走 else 分支），
@@ -99,6 +115,36 @@
     <view wx:if="{{dailyEmpty}}" class="daily-empty card">
         <t-icon name="image" size="64rpx" color="#D5DBE4" />
         <text class="daily-empty-text">课程动态正在整理中，稍后再来看看</text>
+    </view>
+
+    <!-- 列表底部状态：触底加载的反馈
+         为什么必须有这一块：没有它的话，滑到底毫无反应，用户不知道是
+         「正在加载」还是「已经没有了」，会反复下拉、或者以为卡住了。
+
+         三种状态互斥，按优先级：
+           ① fallback  —— 当前是离线假数据，不能假装到底（最优先，因为它
+                          和「加载中」「到底了」在语义上冲突，说了会误导）
+           ② loading   —— 正在取下一页
+           ③ !hasMore  —— 真到底了
+
+         都在 daily_list 为空时不显示，那种情况由上面的空状态负责，
+         否则会出现「没有内容」上面还压一句「已经到底啦」的怪画面。 -->
+    <view wx:if="{{daily_list.length}}" class="daily-foot">
+        <view wx:if="{{dailyFallback}}" class="daily-foot-item">
+            <text class="daily-foot-text">当前为离线示例内容</text>
+        </view>
+        <view wx:elif="{{dailyLoadingMore}}" class="daily-foot-item">
+            <view class="daily-loading-dot"></view>
+            <text class="daily-foot-text">加载中…</text>
+        </view>
+        <view wx:elif="{{!dailyHasMore}}" class="daily-foot-item">
+            <view class="daily-foot-line"></view>
+            <text class="daily-foot-text">已经到底啦</text>
+            <view class="daily-foot-line"></view>
+        </view>
+        <view wx:elif="{{dailyLoadError}}" class="daily-foot-item tapable" bindtap="onRetryMore">
+            <text class="daily-foot-text daily-foot-retry">网络不太顺，点击重试</text>
+        </view>
     </view>
 
     <view class="safe-bottom"></view>

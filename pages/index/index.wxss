@@ -395,3 +395,74 @@ page {
     color: var(--wl-text-3);
     padding: var(--wl-sp-1) 0;
 }
+
+/* ============================================================
+   上课日常 · 触底加载（2026-11-27 加）
+   ============================================================ */
+
+/* 首屏加载占位：比空状态轻，不能占满一屏 ——
+   接口通常几百毫秒就回来，占满一屏会闪得很难看 */
+.daily-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--wl-sp-6) 0;
+}
+
+.daily-loading-text {
+    margin-left: var(--wl-sp-2);
+    font-size: var(--wl-fs-sub);
+    color: var(--wl-text-3);
+}
+
+/* 呼吸点：用缩放动画暗示「还在动」。
+   用 animation 而不是 loading 图片，省一次网络请求也省一份图片资源。 */
+.daily-loading-dot {
+    width: 16rpx;
+    height: 16rpx;
+    border-radius: 50%;
+    background-color: var(--wl-brand);
+    animation: wl-breath 1s ease-in-out infinite;
+}
+
+@keyframes wl-breath {
+    0%, 100% { opacity: 0.35; transform: scale(0.8); }
+    50%      { opacity: 1;    transform: scale(1); }
+}
+
+/* 底部状态条：加载中 / 到底了 / 重试 / 离线示例
+   高度固定 96rpx，避免「加载中」→「到底了」切换时页面跳一下 */
+.daily-foot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 96rpx;
+}
+
+.daily-foot-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.daily-foot-text {
+    font-size: var(--wl-fs-cap);
+    color: var(--wl-text-3);
+}
+
+/* 「已经到底啦」两侧加短线，视觉上收束列表，
+   比孤零零一句灰字更像一个结尾 */
+.daily-foot-line {
+    width: 48rpx;
+    height: 1rpx;
+    background-color: var(--wl-border);
+    margin: 0 var(--wl-sp-2);
+}
+
+/* 重试要看起来可点：品牌色 + 稍大字号。
+   灰色小字会让人以为只是提示，不会去点。 */
+.daily-foot-retry {
+    color: var(--wl-brand);
+    font-size: var(--wl-fs-sub);
+    padding: var(--wl-sp-2) var(--wl-sp-4);
+}
